@@ -18,8 +18,13 @@ export default function Login({ setToken }) {
         return;
       }
       localStorage.setItem("token", token);
-      setToken(token);
-      navigate(`/dashboard/${user._id}`);
+      localStorage.setItem("userRole", user.role);
+      setToken({ token, role: user.role });
+      if (user.role === 'admin') {
+        navigate(`/admin-dashboard/${user._id}`);
+      } else {
+        // navigate(`/dashboard/${user._id}`);
+      }    
     } catch (err) {
       setMessage(err.response?.data?.error || "Login failed");
     }
