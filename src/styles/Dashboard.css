@@ -1,0 +1,66 @@
+.dashboard-container {
+    padding: 2rem;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+  }
+  
+  .dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .welcome-text {
+    font-size: 1.8rem;
+    color: #333;
+  }
+  
+  .logout-button {
+    padding: 0.5rem 1rem;
+    background-color: #ff5252;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .logout-button:hover {
+    background-color: #e53935;
+  }
+  
+  .card {
+    background: white;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+  
+  .leave-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .leave-table th,
+  .leave-table td {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .leave-table th {
+    background-color: #f0f0f0;
+  }
+  
+  .leave-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .loading {
+    padding: 2rem;
+    text-align: center;
+    font-size: 1.2rem;
+    color: #666;
+  }
+  
