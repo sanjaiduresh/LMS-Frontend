@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+// import axios from "axios";
 
 const ApplyLeave = ({ userId }) => {
   const [type, setType] = useState("casual");
@@ -10,12 +10,12 @@ const ApplyLeave = ({ userId }) => {
   const handleApply = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8000/apply-leave", {
-        userId,
-        type,
-        from,
-        to,
-      });
+      // const res = await axios.post("http://localhost:8000/apply-leave", {
+      //   userId,
+      //   type,
+      //   from,
+      //   to,
+      // });
       setMessage("✅ Leave Applied Successfully!");
     } catch (err) {
       setMessage("❌ Failed to apply leave.");

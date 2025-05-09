@@ -3,10 +3,10 @@ import { useState } from 'react';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Dashboard from './Dashboard';
-import AdminDashboard from './AdminDashboard'; // 👈 create this component if needed
+import AdminDashboard from './AdminDashboard'; 
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [, setToken] = useState(localStorage.getItem("token"));
 
   return (
     <Router>

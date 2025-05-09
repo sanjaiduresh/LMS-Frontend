@@ -23,7 +23,7 @@ export default function Login({ setToken }) {
       if (user.role === 'admin') {
         navigate(`/admin-dashboard/${user._id}`);
       } else {
-        // navigate(`/dashboard/${user._id}`);
+        navigate(`/dashboard/${user._id}`);
       }    
     } catch (err) {
       setMessage(err.response?.data?.error || "Login failed");
