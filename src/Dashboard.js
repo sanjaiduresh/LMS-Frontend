@@ -9,7 +9,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [leaves, setLeaves] = useState([]);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
