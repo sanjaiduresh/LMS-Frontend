@@ -1,30 +1,180 @@
+/* Admin Dashboard Container */
 .admin-dashboard {
-    padding: 20px;
+  font-family: "Segoe UI", sans-serif;
+  padding: 40px;
+  background-color: #f4f7fa;
+  min-height: 100vh;
+  color: #333;
+}
+
+/* Header */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.dashboard-header h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.logout-btn {
+  background-color: #ff4d4f;
+  color: white;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #e04345;
+  transform: scale(1.05);
+}
+
+/* Card Styling */
+.card {
+  background-color: white;
+  padding: 24px;
+  margin-bottom: 36px;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  color: #444;
+}
+
+.card p {
+  font-size: 16px;
+  color: #555;
+}
+
+/* Table Styling */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.styled-table th,
+.styled-table td {
+  text-align: left;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 16px;
+}
+
+.styled-table th {
+  background-color: #f0f2f5;
+  font-weight: 600;
+  color: #555;
+}
+
+.styled-table td {
+  background-color: #fff;
+  color: #333;
+}
+
+.styled-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 15px;
+}
+
+/* Leave Status Styling */
+.status-approved {
+  color: #52c41a;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: #f5222d;
+  font-weight: bold;
+}
+
+.status-pending {
+  color: #fa8c16;
+  font-weight: bold;
+}
+
+/* Action Button Styling */
+.action-btns button {
+  margin-right: 12px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.approve {
+  background-color: #52c41a;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.approve:hover {
+  background-color: #41a015;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reject {
+  background-color: #f5222d;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.reject:hover {
+  background-color: #cf1e24;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Media Query for Mobile */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
   }
-  
-  .card {
-    background: #fff;
-    margin-bottom: 20px;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+  .styled-table th,
+  .styled-table td {
+    font-size: 14px;
+    padding: 12px;
   }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
+
+  .logout-btn {
+    padding: 10px 14px;
+    font-size: 14px;
   }
-  
-  th, td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: left;
+
+  .action-btns button {
+    padding: 6px 10px;
+    font-size: 12px;
   }
-  
-  button {
-    margin-right: 5px;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
+}

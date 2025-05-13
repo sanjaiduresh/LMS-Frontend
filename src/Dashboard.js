@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "./styles/Dashboard.css";
@@ -10,19 +10,20 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [leaves, setLeaves] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await axios.get(`http://localhost:8000/user/${id}`);
-        setUser(res.data.user);
-        setLeaves(res.data.leaves);
-      } catch (error) {
-        console.error("Failed to fetch user data", error);
-        navigate("/login");
-      }
-    };
-    fetchData();
+  const fetchData = useCallback(async () => {
+    try {
+      const res = await axios.get(`http://localhost:8000/user/${id}`);
+      setUser(res.data.user);
+      setLeaves(res.data.leaves);
+    } catch (error) {
+      console.error("Failed to fetch user data", error);
+      navigate("/login");
+    }
   }, [id, navigate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -35,18 +36,24 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h2 className="welcome-text">Welcome, {user.name}</h2>
-        <button className="logout-button" onClick={logout}>Logout</button>
+        <button className="logout-button" onClick={logout}>
+          Logout
+        </button>
       </div>
 
       <div className="leave-summary card">
-        <h3>Leave Balance</h3>
+        <h3>
+          Leave Balance: {(parseInt(user.leaveBalance?.casual) || 0) +
+            (parseInt(user.leaveBalance?.sick) || 0) +
+            (parseInt(user.leaveBalance?.earned) || 0)}
+        </h3>
         <p>Casual: {user.leaveBalance?.casual}</p>
         <p>Sick: {user.leaveBalance?.sick}</p>
         <p>Earned: {user.leaveBalance?.earned}</p>
       </div>
 
       <div className="apply-leave-section card">
-        <ApplyLeave userId={user._id} />
+        <ApplyLeave userId={user._id} onLeaveApplied={fetchData} />
       </div>
 
       <div className="leave-history card">
