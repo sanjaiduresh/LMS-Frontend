@@ -22,9 +22,13 @@ export default function Login({ setToken }) {
       setToken({ token, role: user.role });
       if (user.role === 'admin') {
         navigate(`/admin-dashboard/${user._id}`);
-      } else {
+      } else if(user.role === 'employee') {
         navigate(`/dashboard/${user._id}`);
-      }    
+      } else if(user.role === 'hr') {
+        navigate(`/HRDashboard/${user._id}`);
+      } else if(user.role === 'manager') {
+        navigate(`/ManagerDashboard/${user._id}`);
+      }
     } catch (err) {
       setMessage(err.response?.data?.error || "Login failed");
     }

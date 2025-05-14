@@ -49,7 +49,7 @@ export default function Dashboard() {
         </h3>
         <p>Casual: {user.leaveBalance?.casual}</p>
         <p>Sick: {user.leaveBalance?.sick}</p>
-        <p>Earned: {user.leaveBalance?.earned}</p>
+        <p>Earned: {user.leaveBalance?.earned ?? 0}</p>
       </div>
 
       <div className="apply-leave-section card">

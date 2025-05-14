@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "../styles/ApplyLeave.css";
-
 const ApplyLeave = ({ userId , onLeaveApplied}) => {
   const [type, setType] = useState("casual");
   const [from, setFrom] = useState("");
@@ -12,16 +11,42 @@ const ApplyLeave = ({ userId , onLeaveApplied}) => {
 
   const handleApply = async (e) => {
     e.preventDefault();
+  
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+  
+    if (fromDate > toDate) {
+      setMessage("❌ 'From Date' cannot be after 'To Date'");
+      return;
+    }
+  
+    // Count only weekdays
+    let weekdayCount = 0;
+    let tempDate = new Date(fromDate);
+    while (tempDate <= toDate) {
+      const day = tempDate.getDay(); // 0 = Sun, 6 = Sat
+      if (day !== 0 && day !== 6) {
+        weekdayCount++;
+      }
+      tempDate.setDate(tempDate.getDate() + 1);
+    }
+  
+    if (weekdayCount === 0) {
+      setMessage("❌ Leave period falls entirely on weekends. Please choose weekdays.");
+      return;
+    }
+  
     try {
       await axios.post("http://localhost:8000/apply-leave", {
         userId,
         type,
         from,
         to,
-        status:"pending",
+        status: "pending",
         reason,
+        validDays: weekdayCount, // Send this to backend
       });
-      setMessage("✅ Leave Applied Successfully!");
+      setMessage(`✅ Leave Applied for ${weekdayCount} working day(s)!`);
       onLeaveApplied();
       setShowModal(false);
       setFrom("");
@@ -31,6 +56,7 @@ const ApplyLeave = ({ userId , onLeaveApplied}) => {
       setMessage("❌ Failed to apply leave.");
     }
   };
+  
 
   return (
     <div className="apply-leave">
@@ -79,12 +105,12 @@ const ApplyLeave = ({ userId , onLeaveApplied}) => {
               <button type="button" onClick={() => setShowModal(false)}>
                 Cancel
               </button>
+              {message && <p>{message}</p>}
+
             </form>
           </div>
         </div>
       )}
-
-      {message && <p>{message}</p>}
     </div>
   );
 };

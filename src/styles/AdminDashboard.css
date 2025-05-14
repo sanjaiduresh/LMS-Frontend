@@ -178,3 +178,59 @@
     font-size: 12px;
   }
 }
+
+.create-user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.create-user-form h3 {
+  margin-bottom: 12px;
+  font-size: 22px;
+  color: #333;
+  text-align: center;
+}
+
+.create-user-form input,
+.create-user-form select {
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.create-user-form input:focus,
+.create-user-form select:focus {
+  border-color: #0052cc;
+}
+
+.leave-inputs {
+  display: flex;
+  flex-direction: column;
+  /* grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); */
+}
+
+.create-user-form button[type="submit"] {
+  background-color: #0052cc;
+  color: #fff;
+  padding: 10px 14px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-user-form button[type="submit"]:hover {
+  background-color: #003d99;
+}
