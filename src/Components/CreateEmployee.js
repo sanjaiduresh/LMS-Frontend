@@ -92,6 +92,7 @@ export default function CreateEmployee({ onUserCreated }) {
         onChange={handleChange}
       >
         <option value="employee">Employee</option>
+        <option value="manager">Manager</option>
         <option value="hr">HR</option>
       </select>
 

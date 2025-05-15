@@ -40,13 +40,13 @@ export default function HRDashboard() {
     }
   }, []);
 
-  // ✅ Always call hooks unconditionally and only at top level
   useEffect(() => {
     fetchDatas();
     fetchData();
   }, [fetchDatas, fetchData]);
 
-  const handleAction = async (leaveId, action) => {
+  const handleAction = async (leaveId, action, role) => {
+    console.log("Attempting action:", action, "with role:", role);
     if (
       !window.confirm(`Are you sure you want to ${action} this leave request?`)
     )
@@ -55,14 +55,19 @@ export default function HRDashboard() {
       await axios.post("http://localhost:8000/admin/leave-action", {
         leaveId,
         action,
+        role,
       });
       fetchData();
     } catch (err) {
       console.error("Action failed", err);
+      if (err.response) {
+        alert(`Error: ${err.response.data.error}`);
+      } else {
+        alert("An unexpected error occurred.");
+      }
     }
   };
 
-  // ✅ Define the missing logout function
   const logout = () => {
     localStorage.clear();
     navigate("/login");
@@ -96,37 +101,49 @@ export default function HRDashboard() {
               </tr>
             </thead>
             <tbody>
-              {leaves.map((leave) => (
-                <tr key={leave._id}>
-                  <td>{leave.userName || "N/A"}</td>
-                  <td>{leave.type}</td>
-                  <td>{new Date(leave.from).toLocaleDateString()}</td>
-                  <td>{new Date(leave.to).toLocaleDateString()}</td>
-                  <td className={`status-${leave.status}`}>{leave.status}</td>
-                  <td>
-                    {leave.status === "pending" ? (
-                      <div className="action-btns">
-                        <button
-                          className="approve"
-                          title="Approve Leave"
-                          onClick={() => handleAction(leave._id, "approved")}
-                        >
-                          ✅ Approve
-                        </button>
-                        <button
-                          className="reject"
-                          title="Reject Leave"
-                          onClick={() => handleAction(leave._id, "rejected")}
-                        >
-                          ❌ Reject
-                        </button>
-                      </div>
-                    ) : (
-                      leave.status
-                    )}
-                  </td>
-                </tr>
-              ))}
+              {leaves.map((leave) => {
+                const userObj = users.find((u) => u._id === leave.userId);
+                return (
+                  <tr key={leave._id}>
+                    <td>{userObj?.name || "N/A"}</td>
+                    <td>{leave.type}</td>
+                    <td>{new Date(leave.from).toLocaleDateString()}</td>
+                    <td>{new Date(leave.to).toLocaleDateString()}</td>
+                    <td className={`status-${leave.status}`}>
+                      {leave.requiredApprovals &&
+                      leave.requiredApprovals.length === 0
+                        ? "approved"
+                        : "pending"}
+                    </td>
+                    <td>
+                      {leave.status === "pending" ? (
+                        <div className="action-btns">
+                          <button
+                            className="approve"
+                            title="Approve Leave"
+                            onClick={() =>
+                              handleAction(leave._id, "approved", user?.role)
+                            }
+                          >
+                            ✅ Approve
+                          </button>
+                          <button
+                            className="reject"
+                            title="Reject Leave"
+                            onClick={() =>
+                              handleAction(leave._id, "rejected", user?.role)
+                            }
+                          >
+                            ❌ Reject
+                          </button>
+                        </div>
+                      ) : (
+                        leave.status
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -162,7 +179,12 @@ export default function HRDashboard() {
                 <td>{leave.type}</td>
                 <td>{new Date(leave.from).toLocaleDateString()}</td>
                 <td>{new Date(leave.to).toLocaleDateString()}</td>
-                <td>{leave.status}</td>
+                <td>
+                  {leave.requiredApprovals &&
+                  leave.requiredApprovals.length === 0
+                    ? "approved"
+                    : leave.status}
+                </td>
               </tr>
             ))}
           </tbody>

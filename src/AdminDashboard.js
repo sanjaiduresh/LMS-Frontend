@@ -107,7 +107,7 @@ export default function AdminDashboard() {
                   <td>{new Date(leave.to).toLocaleDateString()}</td>
                   <td className={`status-${leave.status}`}>{leave.status}</td>
                   <td>
-                    {leave.status === "pending" ? (
+                    {leave.status === "Pending" ? (
                       <div className="action-btns">
                         <button
                           className="approve"
