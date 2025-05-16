@@ -116,7 +116,7 @@ export default function HRDashboard() {
                         : "pending"}
                     </td>
                     <td>
-                      {leave.status === "pending" ? (
+                      {leave.status === "pending" || leave.status === "Pending" ? (
                         <div className="action-btns">
                           <button
                             className="approve"

@@ -53,7 +53,7 @@ export default function Dashboard() {
       </div>
 
       <div className="apply-leave-section card">
-        <ApplyLeave userId={user._id} onLeaveApplied={fetchData} />
+        <ApplyLeave userId={user._id} onLeaveApplied={fetchData} existingLeaves={leaves}/>
       </div>
 
       <div className="leave-history card">
