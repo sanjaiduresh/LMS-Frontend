@@ -85,7 +85,7 @@ const ApplyLeave = ({ userId, onLeaveApplied, existingLeaves }) => {
     }
 
     try {
-      await axios.post("http://localhost:8000/apply-leave", {
+      await axios.post("https://lms-backend-ofx6.onrender.com/apply-leave", {
         userId,
         type,
         from,

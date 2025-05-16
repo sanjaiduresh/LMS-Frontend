@@ -16,7 +16,7 @@ export default function Register({ setToken }) {
     e.preventDefault();
 
     try {
-  const res = await axios.post("http://localhost:8000/register", {
+  const res = await axios.post("https://lms-backend-ofx6.onrender.com/register", {
     name: form.name,
     email: form.email,
     password: form.password,

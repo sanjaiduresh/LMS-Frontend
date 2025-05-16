@@ -12,7 +12,7 @@ export default function Dashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/user/${id}`);
+      const res = await axios.get(`https://lms-backend-ofx6.onrender.com/user/${id}`);
       setUser(res.data.user);
       setLeaves(res.data.leaves);
     } catch (error) {

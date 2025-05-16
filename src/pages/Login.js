@@ -11,7 +11,7 @@ export default function Login({ setToken }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:8000/login", form);
+      const res = await axios.post("https://lms-backend-ofx6.onrender.com/login", form);
       const { token, user } = res.data;
       if (!user || !user._id) {
         setMessage("Invalid user data received.");

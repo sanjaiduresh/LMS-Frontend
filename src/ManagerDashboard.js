@@ -16,7 +16,7 @@ export default function ManagerDashboard() {
 
   const fetchDatas = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/user/${id}`);
+      const res = await axios.get(`https://lms-backend-ofx6.onrender.com/user/${id}`);
       setUser(res.data.user);
       setLeaves(res.data.leaves);
     } catch (error) {
@@ -28,8 +28,8 @@ export default function ManagerDashboard() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const leaveRes = await axios.get("http://localhost:8000/admin/leaves");
-      const userRes = await axios.get("http://localhost:8000/admin/users");
+      const leaveRes = await axios.get("https://lms-backend-ofx6.onrender.com/admin/leaves");
+      const userRes = await axios.get("https://lms-backend-ofx6.onrender.com/admin/users");
       setLeaves(leaveRes.data);
       setUsers(userRes.data);
       setError(null);
@@ -53,7 +53,7 @@ export default function ManagerDashboard() {
     )
       return;
     try {
-      await axios.post("http://localhost:8000/admin/leave-action", {
+      await axios.post("https://lms-backend-ofx6.onrender.com/admin/leave-action", {
         leaveId,
         action,
         role,

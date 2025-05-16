@@ -14,8 +14,8 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const leaveRes = await axios.get("http://localhost:8000/admin/leaves");
-      const userRes = await axios.get("http://localhost:8000/admin/users");
+      const leaveRes = await axios.get("https://lms-backend-ofx6.onrender.com/admin/leaves");
+      const userRes = await axios.get("https://lms-backend-ofx6.onrender.com/admin/users");
       console.log(leaveRes);
       setLeaves(leaveRes.data);
       setUsers(userRes.data);
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      await axios.post("http://localhost:8000/admin/leave-action", {
+      await axios.post("https://lms-backend-ofx6.onrender.com/admin/leave-action", {
         leaveId,
         action,
       });

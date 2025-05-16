@@ -19,7 +19,7 @@ export default function CreateEmployee({ onUserCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8000/register", {
+      await axios.post("https://lms-backend-ofx6.onrender.com/register", {
         name: formData.name,
         email: formData.email,
         password: formData.password,
