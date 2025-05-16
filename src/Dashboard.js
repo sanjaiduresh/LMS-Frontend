@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "./styles/Dashboard.css";
 import ApplyLeave from "./Components/ApplyLeave";
-
+import API_URL from "./api";
 export default function Dashboard() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ export default function Dashboard() {
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await axios.get(`https://lms-backend-ofx6.onrender.com/user/${id}`);
+      const res = await axios.get(`${API_URL}/user/${id}`);
       setUser(res.data.user);
       setLeaves(res.data.leaves);
     } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import API_URL from '../api';
 import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css';
 
@@ -11,7 +12,7 @@ export default function Login({ setToken }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("https://lms-backend-ofx6.onrender.com/login", form);
+      const res = await axios.post(`${API_URL}/login`, form);
       const { token, user } = res.data;
       if (!user || !user._id) {
         setMessage("Invalid user data received.");

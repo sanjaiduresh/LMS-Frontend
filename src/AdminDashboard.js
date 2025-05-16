@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import CreateEmployee from "./Components/CreateEmployee";
 import "./styles/AdminDashboard.css";
+import API_URL from "./api";
 
 export default function AdminDashboard() {
   const [leaves, setLeaves] = useState([]);
@@ -14,8 +15,8 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const leaveRes = await axios.get("https://lms-backend-ofx6.onrender.com/admin/leaves");
-      const userRes = await axios.get("https://lms-backend-ofx6.onrender.com/admin/users");
+      const leaveRes = await axios.get(`${API_URL}/admin/leaves`);
+      const userRes = await axios.get(`${API_URL}/admin/users`);
       console.log(leaveRes);
       setLeaves(leaveRes.data);
       setUsers(userRes.data);
@@ -37,7 +38,7 @@ export default function AdminDashboard() {
     }
 
     try {
-      await axios.post("https://lms-backend-ofx6.onrender.com/admin/leave-action", {
+      await axios.post(`${API_URL}/admin/leave-action`, {
         leaveId,
         action,
       });

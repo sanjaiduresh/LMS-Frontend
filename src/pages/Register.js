@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import API_URL from "../api";
 import { useNavigate, Link } from "react-router-dom";
 import "../styles/Auth.css";
 
@@ -16,7 +17,7 @@ export default function Register({ setToken }) {
     e.preventDefault();
 
     try {
-  const res = await axios.post("https://lms-backend-ofx6.onrender.com/register", {
+  const res = await axios.post(`${API_URL}/register`, {
     name: form.name,
     email: form.email,
     password: form.password,

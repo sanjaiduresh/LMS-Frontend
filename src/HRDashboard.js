@@ -3,8 +3,7 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import "./styles/HRDashboard.css";
 import ApplyLeave from "./Components/ApplyLeave";
-import CreateEmployee from "./Components/CreateEmployee";
-
+import API_URL from "./api";
 export default function HRDashboard() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,11 +11,11 @@ export default function HRDashboard() {
   const [leaves, setLeaves] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [, setError] = useState(null);
 
   const fetchDatas = useCallback(async () => {
     try {
-      const res = await axios.get(`https://lms-backend-ofx6.onrender.com/user/${id}`);
+      const res = await axios.get(`${API_URL}/user/${id}`);
       setUser(res.data.user);
       setLeaves(res.data.leaves);
     } catch (error) {
@@ -28,8 +27,8 @@ export default function HRDashboard() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const leaveRes = await axios.get("https://lms-backend-ofx6.onrender.com/admin/leaves");
-      const userRes = await axios.get("https://lms-backend-ofx6.onrender.com/admin/users");
+      const leaveRes = await axios.get(`${API_URL}/admin/leaves`);
+      const userRes = await axios.get(`${API_URL}/admin/users`);
       setLeaves(leaveRes.data);
       setUsers(userRes.data);
       setError(null);
@@ -52,7 +51,7 @@ export default function HRDashboard() {
     )
       return;
     try {
-      await axios.post("https://lms-backend-ofx6.onrender.com/admin/leave-action", {
+      await axios.post(`${API_URL}/admin/leave-action`, {
         leaveId,
         action,
         role,

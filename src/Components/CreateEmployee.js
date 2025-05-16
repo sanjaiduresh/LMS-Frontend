@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-// import "../styles/CreateEmployee.css";
+import API_URL from "../api";
 export default function CreateEmployee({ onUserCreated }) {
   const [formData, setFormData] = useState({
     name: "",
@@ -19,7 +19,7 @@ export default function CreateEmployee({ onUserCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("https://lms-backend-ofx6.onrender.com/register", {
+      await axios.post(`${API_URL}/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,

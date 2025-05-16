@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import API_URL from "../api";
 import "../styles/ApplyLeave.css";
 
 const ApplyLeave = ({ userId, onLeaveApplied, existingLeaves }) => {
@@ -85,7 +86,7 @@ const ApplyLeave = ({ userId, onLeaveApplied, existingLeaves }) => {
     }
 
     try {
-      await axios.post("https://lms-backend-ofx6.onrender.com/apply-leave", {
+      await axios.post(`${API_URL}/apply-leave`, {
         userId,
         type,
         from,
