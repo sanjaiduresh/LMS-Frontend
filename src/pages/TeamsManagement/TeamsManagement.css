@@ -1,0 +1,450 @@
+/* Teams Management Styles */
+.teams-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.teams-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.teams-header h2 {
+  color: #2c3e50;
+  margin: 0;
+}
+
+.refresh-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.refresh-btn:hover {
+  background: #138496;
+}
+
+/* Teams Grid */
+.teams-section {
+  margin-bottom: 40px;
+}
+
+.teams-section h3 {
+  color: #495057;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.team-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s;
+}
+
+.team-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.manager-info h4 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.manager-info .email {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 4px 0 0 0;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.role-badge.manager {
+  background: #d4edda;
+  color: #28a745;
+}
+
+.team-stats {
+  text-align: right;
+}
+
+.member-count {
+  background: #f8f9fa;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: #495057;
+  font-weight: 500;
+}
+
+/* Team Members */
+.team-members h5 {
+  color: #495057;
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+}
+
+.members-list {
+  space-y: 8px;
+}
+
+.member-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.member-info {
+  flex-grow: 1;
+}
+
+.member-name {
+  display: block;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.member-email {
+  display: block;
+  color: #6c757d;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.member-actions {
+  margin: 0 10px;
+}
+
+.reassign-btn {
+  background: #ffc107;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+}
+
+.reassign-btn:hover {
+  background: #e0a800;
+}
+
+.leave-balance {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-align: center;
+  min-width: 80px;
+}
+
+.no-members {
+  color: #6c757d;
+  font-style: italic;
+  margin: 0;
+  padding: 15px;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+/* Unassigned Employees Section */
+.unassigned-section {
+  margin-top: 40px;
+  padding: 20px;
+  background: #fff3cd;
+  border-radius: 12px;
+  border: 1px solid #ffeaa7;
+}
+
+.unassigned-section h3 {
+  color: #856404;
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+}
+
+.unassigned-list {
+  display: grid;
+  gap: 12px;
+}
+
+.unassigned-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #f0c674;
+}
+
+.employee-info {
+  flex-grow: 1;
+}
+
+.employee-name {
+  display: block;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.employee-email {
+  display: block;
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.assign-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+
+.assign-btn:hover {
+  background: #218838;
+}
+
+/* Modal Styles for Reassignment */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.close-modal-btn:hover {
+  background: #f8f9fa;
+  color: #495057;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-body p {
+  margin: 0 0 20px 0;
+  color: #495057;
+  font-size: 1rem;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+}
+
+.modal-footer button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modal-footer button:first-child {
+  background: #6c757d;
+  color: white;
+}
+
+.modal-footer button:first-child:hover {
+  background: #5a6268;
+}
+
+.confirm-btn {
+  background: #007bff !important;
+  color: white !important;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background: #0056b3 !important;
+}
+
+.confirm-btn:disabled {
+  background: #6c757d !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* No Data States */
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-style: italic;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+/* Error Message */
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .teams-container {
+    padding: 15px;
+  }
+  
+  .teams-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .team-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .member-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .unassigned-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .modal-content {
+    margin: 20px;
+    max-width: calc(100vw - 40px);
+  }
+}

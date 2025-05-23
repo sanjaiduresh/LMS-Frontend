@@ -1,57 +1,70 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import "./styles/Dashboard.css";
+import "./styles/ManagerDashboard.css";
 import ApplyLeave from "./Components/ApplyLeave";
 import API_URL from "./api";
+import LeaveCalendar from "./pages/LeaveCalendar/LeaveCalendar";
+
 export default function ManagerDashboard() {
+  /* ------------------------------------------------------------------ */
+  /* State & helpers                                                    */
+  /* ------------------------------------------------------------------ */
   const { id } = useParams();
   const navigate = useNavigate();
+  const role = localStorage.getItem("userRole");
+  
   const [user, setUser] = useState(null);
   const [leaves, setLeaves] = useState([]);
   const [users, setUsers] = useState([]);
+  const [activeTab, setActiveTab] = useState("pending");
   const [loading, setLoading] = useState(true);
-  const [, setError] = useState(null);
-  const role = localStorage.getItem("userRole");
+  const [error, setError] = useState(null);
 
-  const fetchDatas = useCallback(async () => {
-    try {
-      const res = await axios.get(`${API_URL}/user/${id}`);
-      setUser(res.data.user);
-      setLeaves(res.data.leaves);
-    } catch (error) {
-      console.error("Failed to fetch user data", error);
-      navigate("/login");
-    }
-  }, [id, navigate]);
-
+  /* ----- fetch data ------------------------------------------------ */
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const leaveRes = await axios.get(`${API_URL}/admin/leaves`);
-      const userRes = await axios.get(`${API_URL}/admin/users`);
+      const [userRes, leaveRes, usersRes] = await Promise.all([
+        axios.get(`${API_URL}/user/${id}`),
+        axios.get(`${API_URL}/admin/leaves`),
+        axios.get(`${API_URL}/admin/users`)
+      ]);
+      
+      setUser(userRes.data.user);
       setLeaves(leaveRes.data);
-      setUsers(userRes.data);
+      setUsers(usersRes.data);
       setError(null);
     } catch (err) {
-      setError("Failed to fetch admin data. Please try again later.");
+      console.error("Failed to fetch data", err);
+      setError("Failed to fetch dashboard data. Please try again later.");
+      navigate("/login");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [id, navigate]);
 
-  // ✅ Always call hooks unconditionally and only at top level
-  useEffect(() => {
-    fetchDatas();
-    fetchData();
-  }, [fetchDatas, fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleAction = async (leaveId, action, role) => {
-    console.log("Attempting action:", action, "with role:", role);
-    if (
-      !window.confirm(`Are you sure you want to ${action} this leave request?`)
-    )
-      return;
+  /* ------------------------------------------------------------------ */
+  /* Derived data                                                       */
+  /* ------------------------------------------------------------------ */
+  const { pendingLeaves, historyLeaves } = useMemo(() => {
+    const pending = leaves.filter(leave => 
+      leave.requiredApprovals?.includes(user?.role?.toLowerCase())
+    );
+    const history = leaves.filter(leave => 
+      !leave.requiredApprovals?.includes(user?.role?.toLowerCase())
+    );
+    return { pendingLeaves: pending, historyLeaves: history };
+  }, [leaves, user?.role]);
+
+  /* ------------------------------------------------------------------ */
+  /* Actions                                                            */
+  /* ------------------------------------------------------------------ */
+  const handleAction = async (leaveId, action) => {
+    if (!window.confirm(`Are you sure you want to ${action} this leave request?`)) return;
+    
     try {
       await axios.post(`${API_URL}/admin/leave-action`, {
         leaveId,
@@ -61,133 +74,173 @@ export default function ManagerDashboard() {
       fetchData();
     } catch (err) {
       console.error("Action failed", err);
-      if (err.response) {
-        alert(`Error: ${err.response.data.error}`);
-      } else {
-        alert("An unexpected error occurred.");
-      }
+      alert(err.response?.data?.error || "An unexpected error occurred.");
     }
   };
-  // ✅ Define the missing logout function
+
   const logout = () => {
     localStorage.clear();
     navigate("/login");
   };
 
-  if (loading || !user) {
-    return <div className="loading">Loading...</div>;
-  }
+  /* ------------------------------------------------------------------ */
+  /* Helpers                                                            */
+  /* ------------------------------------------------------------------ */
+  const getUserName = (userId) => {
+    const userObj = users.find(u => u._id === userId);
+    return userObj?.name || "N/A";
+  };
+
+  const renderRows = (arr, showActions = false) => {
+    if (arr.length === 0) {
+      return (
+        <tr>
+          <td colSpan="6" className="md-empty-state">
+            <div className="md-empty-state-icon">📋</div>
+            <div>No {activeTab} requests found</div>
+          </td>
+        </tr>
+      );
+    }
+
+    return arr.map((leave) => (
+      <tr key={leave._id}>
+        <td>{getUserName(leave.userId)}</td>
+        <td>{leave.type}</td>
+        <td>{new Date(leave.from).toLocaleDateString()}</td>
+        <td>{new Date(leave.to).toLocaleDateString()}</td>
+        <td className={`md-status-${leave.status?.toLowerCase()}`}>
+          {leave.requiredApprovals?.length === 0 ? "Approved" : leave.status}
+        </td>
+        <td className="md-actions-cell">
+          {showActions ? (
+            <div className="md-action-buttons">
+              <button
+                className="md-action-button md-approve-button"
+                onClick={() => handleAction(leave._id, "approved")}
+              >
+                ✅ Approve
+              </button>
+              <button
+                className="md-action-button md-reject-button"
+                onClick={() => handleAction(leave._id, "rejected")}
+              >
+                ❌ Reject
+              </button>
+            </div>
+          ) : (
+            <span className="md-no-actions">—</span>
+          )}
+        </td>
+      </tr>
+    ));
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* Render                                                             */
+  /* ------------------------------------------------------------------ */
+  if (loading) return <div className="md-loading">Loading Manager Dashboard…</div>;
+  if (error) return <div className="md-error">{error}</div>;
+  if (!user) return null;
+
+  const totalBalance =
+    (parseInt(user.leaveBalance?.casual) || 0) +
+    (parseInt(user.leaveBalance?.sick) || 0) +
+    (parseInt(user.leaveBalance?.earned) || 0);
 
   return (
-    <div className="dashboard-container">
-      Manager Dashboard
-      <div className="dashboard-header">
-        <h2 className="welcome-text">Welcome, {user.name}</h2>
-        <button className="logout-button" onClick={logout}>
-          Logout
-        </button>
-      </div>
-      <section className="card">
-        <h3>Leave Requests</h3>
-        <div className="table-wrapper">
-          <table className="styled-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Type</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaves.map((leave) => {
-                const userObj = users.find((u) => u._id === leave.userId);
-                return (
-                  <tr key={leave._id}>
-                    <td>{userObj?.name || "N/A"}</td>
-                    <td>{leave.type}</td>
-                    <td>{new Date(leave.from).toLocaleDateString()}</td>
-                    <td>{new Date(leave.to).toLocaleDateString()}</td>
-                    <td className={`status-${leave.status}`}>
-                      {leave.requiredApprovals &&
-                      leave.requiredApprovals.length === 0
-                        ? "approved"
-                        : "pending"}
-                    </td>
-                    <td>
-                      {leave.requiredApprovals.includes(
-                        user.role.toLowerCase()
-                      ) ? (
-                        <div className="action-btns">
-                          <button
-                            className="approve"
-                            title="Approve Leave"
-                            onClick={() => handleAction(leave._id, "approved", role)}
-                          >
-                            ✅ Approve
-                          </button>
-                          <button
-                            className="reject"
-                            title="Reject Leave"
-                            onClick={() => handleAction(leave._id, "rejected", role)}
-                          >
-                            ❌ Reject
-                          </button>
-                        </div>
-                      ) : leave.requiredApprovals.length > 0 ? (
-                        "pending"
-                      ) : (
-                        leave.status
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+    <div className="md-dashboard-container">
+      {/* ---------- header ------------------------------------------- */}
+      <div className="md-dashboard-header">
+        <div className="md-header-left">
+          <h2 className="md-welcome-text">Manager Dashboard</h2>
+          <p className="md-subtitle">Welcome, {user.name}</p>
         </div>
-      </section>
-      <div className="leave-summary card">
-        <h3>
-          Leave Balance:{" "}
-          {(parseInt(user.leaveBalance?.casual) || 0) +
-            (parseInt(user.leaveBalance?.sick) || 0) +
-            (parseInt(user.leaveBalance?.earned) || 0)}
-        </h3>
-        <p>Casual: {user.leaveBalance?.casual}</p>
-        <p>Sick: {user.leaveBalance?.sick}</p>
-        <p>Earned: {user.leaveBalance?.earned}</p>
+        <div className="md-header-right">
+          <button className="md-logout-button" onClick={logout}>Logout</button>
+        </div>
       </div>
-      <div className="apply-leave-section card">
-        <ApplyLeave userId={user._id} onLeaveApplied={fetchData} />
+
+      {/* ---------- grid layout -------------------------------------- */}
+      <div className="md-dashboard-grid">
+        {/* ===== Sidebar ============================================ */}
+        <aside className="md-dashboard-sidebar">
+          {/* Balance card */}
+          <div className="md-leave-summary">
+            <h3>{totalBalance}</h3>
+            <div>Your Leave Balance</div>
+
+            <div className="md-balance-grid">
+              {["Casual", "Sick", "Earned"].map((lbl) => (
+                <div key={lbl} className="md-balance-item">
+                  <div className="md-label">{lbl}</div>
+                  <div className="md-value">
+                    {user.leaveBalance?.[lbl.toLowerCase()] || 0}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Apply Leave */}
+          <div className="md-apply-leave-section">
+            <ApplyLeave
+              userId={user._id}
+              onLeaveApplied={fetchData}
+              existingLeaves={leaves}
+            />
+          </div>
+        </aside>
+
+        {/* ===== Main panel ========================================= */}
+        <main className="md-dashboard-main">
+          {/* Tabs */}
+          <div className="md-status-tabs">
+            <button
+              className={`md-tab-button ${activeTab === "pending" ? "md-active" : ""}`}
+              onClick={() => setActiveTab("pending")}
+            >
+              Pending Approvals&nbsp;({pendingLeaves.length})
+            </button>
+            <button
+              className={`md-tab-button ${activeTab === "history" ? "md-active" : ""}`}
+              onClick={() => setActiveTab("history")}
+            >
+              All Requests&nbsp;({historyLeaves.length})
+            </button>
+          </div>
+
+          {/* Table card */}
+          <section className="md-card">
+            <header className="md-card-header">
+              <h3>
+                {activeTab === "pending" ? "Requests Awaiting Your Approval" : "All Leave Requests"}
+              </h3>
+            </header>
+
+            <div className="md-card-content">
+              <table className="md-leave-table">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Type</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeTab === "pending"
+                    ? renderRows(pendingLeaves, true)
+                    : renderRows(historyLeaves, false)}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </main>
       </div>
-      <div className="leave-history card">
-        <h3>Leave History</h3>
-        <table className="leave-table">
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Type</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leaves.map((leave, idx) => (
-              <tr key={idx}>
-                <td>{leave.userName || "N/A"}</td>
-                <td>{leave.type}</td>
-                <td>{new Date(leave.from).toLocaleDateString()}</td>
-                <td>{new Date(leave.to).toLocaleDateString()}</td>
-                <td>{leave.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <LeaveCalendar leaves={leaves} />
     </div>
   );
 }

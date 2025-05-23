@@ -1,0 +1,113 @@
+/* ────────────────────────────────────────────────────────────
+   GLOBAL THEME TOKENS
+   ──────────────────────────────────────────────────────────── */
+:root {
+  /* backgrounds */
+  --bg-primary      : #0d0d0d;
+  --bg-secondary    : #1a1a1a;
+  --bg-card         : #1e1e1e;
+
+  /* brand accent (purple) */
+  --accent-1        : #8b5cf6;
+  --accent-2        : #a855f7;
+  --accent-dark     : #6d28d9;
+
+  /* semantic */
+  --success         : #22c55e;
+  --warning         : #f59e0b;
+  --danger          : #ef4444;
+
+  /* text */
+  --text-primary    : #ffffff;
+  --text-secondary  : #b3b3b3;
+  --text-muted      : #666666;
+
+  /* misc */
+  --border          : #333333;
+  --radius-sm       : 6px;
+  --radius-md       : 8px;
+  --radius-lg       : 12px;
+  --shadow-sm       : 0 2px 6px rgba(0,0,0,.2);
+  --shadow-md       : 0 6px 16px rgba(0,0,0,.3);
+  --shadow-lg       : 0 12px 32px rgba(0,0,0,.35);
+}
+
+/* ────────────────────────────────────────────────────────────
+   GLOBAL BASE + UTILITIES
+   ──────────────────────────────────────────────────────────── */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--accent-1);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+.flex-center   { display: flex; align-items: center; justify-content: center; }
+.text-center   { text-align: center; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem 1rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+}
+.btn:hover        { transform: translateY(-1px); }
+.btn:active       { transform: translateY(0); }
+.btn-primary      { background: var(--accent-1); color: #fff; }
+.btn-danger       { background: var(--danger);   color: #fff; }
+.btn-outline      { background: none; border-color: var(--border); color: var(--text-secondary); }
+.btn-outline:hover { color: var(--accent-1); border-color: var(--accent-1); }
+
+/* Status helpers */
+.status-approved { color: var(--success); }
+.status-rejected { color: var(--danger); }
+.status-pending  { color: var(--warning); }
+
+/* Table */
+.table-base {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table-base th,
+.table-base td {
+  padding: .8rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.table-base th {
+  text-transform: uppercase;
+  font-size: .8rem;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  letter-spacing: .04em;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-1);
+}

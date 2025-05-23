@@ -158,8 +158,6 @@ const ApplyLeave = ({ userId, onLeaveApplied, existingLeaves }) => {
                 onClick={() => {
                   setShowModal(false);
                   setMessage("");
-                  onLeaveApplied();
-                  setShowModal(false);
                   setFrom("");
                   setTo("");
                   setReason("");
