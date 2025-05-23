@@ -95,7 +95,7 @@ export default function AdminDashboard() {
           {/* ✅ Trigger Modal Button */}
           <div className="card">
             <button className="open-modal-btn" onClick={() => setShowModal(true)}>
-              ➕ Create New Employee
+              ✖ Create New Employee
             </button>
           </div>
 

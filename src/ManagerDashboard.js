@@ -15,8 +15,9 @@ export default function ManagerDashboard() {
   const role = localStorage.getItem("userRole");
   
   const [user, setUser] = useState(null);
-  const [leaves, setLeaves] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [teamData, setTeamData] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [teamLeaves, setTeamLeaves] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,20 +26,28 @@ export default function ManagerDashboard() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [userRes, leaveRes, usersRes] = await Promise.all([
+      
+      // Fetch user data and team data
+      const [userRes, teamRes] = await Promise.all([
         axios.get(`${API_URL}/user/${id}`),
-        axios.get(`${API_URL}/admin/leaves`),
-        axios.get(`${API_URL}/admin/users`)
+        axios.get(`${API_URL}/manager/${id}/team`)
       ]);
       
       setUser(userRes.data.user);
-      setLeaves(leaveRes.data);
-      setUsers(usersRes.data);
+      setTeamData(teamRes.data);
+      setTeamMembers(teamRes.data.members || []);
+      setTeamLeaves(teamRes.data.teamLeaves || []);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch data", err);
       setError("Failed to fetch dashboard data. Please try again later.");
-      navigate("/login");
+      if (err.response?.status === 403) {
+        setError("Access denied. You are not authorized to view this page.");
+      } else if (err.response?.status === 404) {
+        setError("Manager not found or has no team assigned.");
+      } else {
+        navigate("/login");
+      }
     } finally {
       setLoading(false);
     }
@@ -50,14 +59,16 @@ export default function ManagerDashboard() {
   /* Derived data                                                       */
   /* ------------------------------------------------------------------ */
   const { pendingLeaves, historyLeaves } = useMemo(() => {
-    const pending = leaves.filter(leave => 
-      leave.requiredApprovals?.includes(user?.role?.toLowerCase())
+    const pending = teamLeaves.filter(leave => 
+      leave.requiredApprovals?.includes(role?.toLowerCase()) && 
+      leave.status?.toLowerCase() === 'pending'
     );
-    const history = leaves.filter(leave => 
-      !leave.requiredApprovals?.includes(user?.role?.toLowerCase())
+    const history = teamLeaves.filter(leave => 
+      !leave.requiredApprovals?.includes(role?.toLowerCase()) ||
+      leave.status?.toLowerCase() !== 'pending'
     );
     return { pendingLeaves: pending, historyLeaves: history };
-  }, [leaves, user?.role]);
+  }, [teamLeaves, role]);
 
   /* ------------------------------------------------------------------ */
   /* Actions                                                            */
@@ -69,7 +80,7 @@ export default function ManagerDashboard() {
       await axios.post(`${API_URL}/admin/leave-action`, {
         leaveId,
         action,
-        role,
+        role: role?.toLowerCase(),
       });
       fetchData();
     } catch (err) {
@@ -87,17 +98,24 @@ export default function ManagerDashboard() {
   /* Helpers                                                            */
   /* ------------------------------------------------------------------ */
   const getUserName = (userId) => {
-    const userObj = users.find(u => u._id === userId);
-    return userObj?.name || "N/A";
+    const member = teamMembers.find(m => m._id === userId);
+    return member?.name || "N/A";
+  };
+
+  const calculateLeaveDays = (from, to) => {
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    const timeDiff = Math.abs(toDate.getTime() - fromDate.getTime());
+    return Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
   };
 
   const renderRows = (arr, showActions = false) => {
     if (arr.length === 0) {
       return (
         <tr>
-          <td colSpan="6" className="md-empty-state">
+          <td colSpan="7" className="md-empty-state">
             <div className="md-empty-state-icon">📋</div>
-            <div>No {activeTab} requests found</div>
+            <div>No {activeTab} requests found from your team</div>
           </td>
         </tr>
       );
@@ -105,10 +123,11 @@ export default function ManagerDashboard() {
 
     return arr.map((leave) => (
       <tr key={leave._id}>
-        <td>{getUserName(leave.userId)}</td>
+        <td>{leave.userName || getUserName(leave.userId)}</td>
         <td>{leave.type}</td>
         <td>{new Date(leave.from).toLocaleDateString()}</td>
         <td>{new Date(leave.to).toLocaleDateString()}</td>
+        <td>{calculateLeaveDays(leave.from, leave.to)} day(s)</td>
         <td className={`md-status-${leave.status?.toLowerCase()}`}>
           {leave.requiredApprovals?.length === 0 ? "Approved" : leave.status}
         </td>
@@ -155,6 +174,9 @@ export default function ManagerDashboard() {
         <div className="md-header-left">
           <h2 className="md-welcome-text">Manager Dashboard</h2>
           <p className="md-subtitle">Welcome, {user.name}</p>
+          <p className="md-team-info">
+            Managing {teamMembers.length} team member{teamMembers.length !== 1 ? 's' : ''}
+          </p>
         </div>
         <div className="md-header-right">
           <button className="md-logout-button" onClick={logout}>Logout</button>
@@ -182,12 +204,36 @@ export default function ManagerDashboard() {
             </div>
           </div>
 
+          {/* Team Overview */}
+          <div className="md-team-overview">
+            <h4>Your Team</h4>
+            {teamMembers.length > 0 ? (
+              <div className="md-team-list">
+                {teamMembers.map(member => (
+                  <div key={member._id} className="md-team-member">
+                    <div className="md-member-name">{member.name}</div>
+                    <div className="md-member-email">{member.email}</div>
+                    <div className="md-member-balance">
+                      Total Balance: {
+                        (member.leaveBalance?.casual || 0) +
+                        (member.leaveBalance?.sick || 0) +
+                        (member.leaveBalance?.earned || 0)
+                      } days
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="md-no-team">No team members assigned</div>
+            )}
+          </div>
+
           {/* Apply Leave */}
           <div className="md-apply-leave-section">
             <ApplyLeave
               userId={user._id}
               onLeaveApplied={fetchData}
-              existingLeaves={leaves}
+              existingLeaves={teamLeaves.filter(leave => leave.userId === user._id)}
             />
           </div>
         </aside>
@@ -206,7 +252,7 @@ export default function ManagerDashboard() {
               className={`md-tab-button ${activeTab === "history" ? "md-active" : ""}`}
               onClick={() => setActiveTab("history")}
             >
-              All Requests&nbsp;({historyLeaves.length})
+              Team Requests&nbsp;({historyLeaves.length})
             </button>
           </div>
 
@@ -214,7 +260,9 @@ export default function ManagerDashboard() {
           <section className="md-card">
             <header className="md-card-header">
               <h3>
-                {activeTab === "pending" ? "Requests Awaiting Your Approval" : "All Leave Requests"}
+                {activeTab === "pending" 
+                  ? "Team Requests Awaiting Your Approval" 
+                  : "All Team Leave Requests"}
               </h3>
             </header>
 
@@ -226,6 +274,7 @@ export default function ManagerDashboard() {
                     <th>Type</th>
                     <th>From</th>
                     <th>To</th>
+                    <th>Duration</th>
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -240,7 +289,7 @@ export default function ManagerDashboard() {
           </section>
         </main>
       </div>
-    <LeaveCalendar leaves={leaves} />
+      <LeaveCalendar leaves={teamLeaves} />
     </div>
   );
 }
