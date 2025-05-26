@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   ChevronLeft, ChevronRight, Calendar, User, Clock,
 } from 'lucide-react';
@@ -7,6 +7,7 @@ import './LeaveCalendar.css';
 export default function LeaveCalendar({ leaves = [] }) {
   const [currentDate,  setCurrentDate]  = useState(new Date());
   const [hoveredLeave, setHoveredLeave] = useState(null);
+//   const [leavesData, setLeavesData] = useState(leaves);
 
   const monthNames = [
     'January','February','March','April','May','June',
@@ -156,7 +157,7 @@ export default function LeaveCalendar({ leaves = [] }) {
                 </div>
                 <div className="lc-tooltip-info">
                   <div><User size={12}/> {lv.userId}</div>
-                  <div><Clock size={12}/> {formatDate(lv.fromDate)} – {formatDate(lv.toDate)}</div>
+                  <div><Clock size={12}/> {formatDate(lv.fromDate)} - {formatDate(lv.toDate)}</div>
                   <div><b>Type:</b> {lv.type}</div>
                   {lv.reason && <div><b>Reason:</b> {lv.reason}</div>}
                 </div>

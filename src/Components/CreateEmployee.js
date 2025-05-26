@@ -146,7 +146,7 @@ export default function CreateEmployee({ managers, onCreated, onClose }) {
               </option>
             ))}
           </select>
-          {!managers || managers.length === 0 && (
+          {((!managers) || managers.length) === 0 && (
             <small className="warning">No managers available. Create a manager first.</small>
           )}
         </div>

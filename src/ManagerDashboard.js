@@ -15,12 +15,15 @@ export default function ManagerDashboard() {
   const role = localStorage.getItem("userRole");
   
   const [user, setUser] = useState(null);
-  const [teamData, setTeamData] = useState(null);
+  const [, setTeamData] = useState(null);
   const [teamMembers, setTeamMembers] = useState([]);
+  const [filteredTeamMembers, setFilteredTeamMembers] = useState([]);
   const [teamLeaves, setTeamLeaves] = useState([]);
   const [activeTab, setActiveTab] = useState("pending");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterBalance, setFilterBalance] = useState("");
 
   /* ----- fetch data ------------------------------------------------ */
   const fetchData = useCallback(async () => {
@@ -36,6 +39,7 @@ export default function ManagerDashboard() {
       setUser(userRes.data.user);
       setTeamData(teamRes.data);
       setTeamMembers(teamRes.data.members || []);
+      setFilteredTeamMembers(teamRes.data.members || []); // Initialize filteredTeamMembers
       setTeamLeaves(teamRes.data.teamLeaves || []);
       setError(null);
     } catch (err) {
@@ -53,7 +57,39 @@ export default function ManagerDashboard() {
     }
   }, [id, navigate]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  /* ----- search and filter ----------------------------------------- */
+  useEffect(() => {
+    let filtered = teamMembers;
+
+    // Search by name or email
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (member) =>
+          member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          member.email.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filter by leave balance
+    if (filterBalance) {
+      filtered = filtered.filter((member) => {
+        const totalBalance =
+          (parseInt(member.leaveBalance?.casual) || 0) +
+          (parseInt(member.leaveBalance?.sick) || 0) +
+          (parseInt(member.leaveBalance?.earned) || 0);
+        if (filterBalance === "low") return totalBalance < 10;
+        if (filterBalance === "medium") return totalBalance >= 10 && totalBalance <= 20;
+        if (filterBalance === "high") return totalBalance > 20;
+        return true;
+      });
+    }
+
+    setFilteredTeamMembers(filtered);
+  }, [searchQuery, filterBalance, teamMembers]);
 
   /* ------------------------------------------------------------------ */
   /* Derived data                                                       */
@@ -182,6 +218,76 @@ export default function ManagerDashboard() {
           <button className="md-logout-button" onClick={logout}>Logout</button>
         </div>
       </div>
+
+      {/* ---------- search and filter -------------------------------- */}
+      <section className="md-card">
+        <h3>Team Member Search & Filter</h3>
+        <div className="md-search-filter-container">
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="md-search-input"
+          />
+          <div className="md-filter-group">
+            <label>Filter by Leave Balance:</label>
+            <select
+              value={filterBalance}
+              onChange={(e) => setFilterBalance(e.target.value)}
+              className="md-filter-select"
+            >
+              <option value="">All Balances</option>
+              <option value="low">Low (&lt; 10 days)</option>
+              <option value="medium">Medium (10-20 days)</option>
+              <option value="high">High (&gt; 20 days)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Team Member List */}
+        <div className="md-table-wrapper">
+          <table className="md-leave-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Total Leave Balance</th>
+                <th>Casual</th>
+                <th>Sick</th>
+                <th>Earned</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredTeamMembers.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="md-empty-state">
+                    <div className="md-empty-state-icon">🔍</div>
+                    <div>No team members found</div>
+                  </td>
+                </tr>
+              ) : (
+                filteredTeamMembers.map((member) => {
+                  const totalBalance =
+                    (parseInt(member.leaveBalance?.casual) || 0) +
+                    (parseInt(member.leaveBalance?.sick) || 0) +
+                    (parseInt(member.leaveBalance?.earned) || 0);
+                  return (
+                    <tr key={member._id}>
+                      <td>{member.name}</td>
+                      <td>{member.email}</td>
+                      <td>{totalBalance}</td>
+                      <td>{member.leaveBalance?.casual ?? "-"}</td>
+                      <td>{member.leaveBalance?.sick ?? "-"}</td>
+                      <td>{member.leaveBalance?.earned ?? "-"}</td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       {/* ---------- grid layout -------------------------------------- */}
       <div className="md-dashboard-grid">
