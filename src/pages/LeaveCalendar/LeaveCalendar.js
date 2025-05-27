@@ -1,19 +1,15 @@
 import { useState, useMemo } from 'react';
-import {
-  ChevronLeft, ChevronRight, Calendar, User, Clock,
-} from 'lucide-react';
-import './LeaveCalendar.css';
+import { ChevronLeft, ChevronRight, Calendar, User, Clock } from 'lucide-react';
 
 export default function LeaveCalendar({ leaves = [] }) {
-  const [currentDate,  setCurrentDate]  = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [hoveredLeave, setHoveredLeave] = useState(null);
-//   const [leavesData, setLeavesData] = useState(leaves);
 
   const monthNames = [
-    'January','February','March','April','May','June',
-    'July','August','September','October','November','December',
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
   ];
-  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const navigateMonth = (dir) => {
     const d = new Date(currentDate);
@@ -21,44 +17,44 @@ export default function LeaveCalendar({ leaves = [] }) {
     setCurrentDate(d);
   };
 
-  /* ----------------------- data prep ------------------------------ */
   const processedLeaves = useMemo(() => (
     leaves.map((lv) => ({
       ...lv,
-      fromDate:    new Date(lv.from),
-      toDate:      new Date(lv.to),
+      fromDate: new Date(lv.from),
+      toDate: new Date(lv.to),
       createdDate: new Date(lv.createdAt),
     }))
   ), [leaves]);
 
   const getLeavesForDate = (date) => {
-    const dayStart = new Date(date); dayStart.setHours(0, 0, 0, 0);
+    const dayStart = new Date(date); 
+    dayStart.setHours(0, 0, 0, 0);
     return processedLeaves.filter((lv) => {
-      const from = new Date(lv.fromDate); from.setHours(0, 0, 0, 0);
-      const to   = new Date(lv.toDate);   to.setHours(0, 0, 0, 0);
+      const from = new Date(lv.fromDate); 
+      from.setHours(0, 0, 0, 0);
+      const to = new Date(lv.toDate); 
+      to.setHours(0, 0, 0, 0);
       return dayStart >= from && dayStart <= to;
     });
   };
 
-  const getStatusColourClass = (status) => {
+  const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case 'approved': return 'lc-status-approved';
-      case 'rejected': return 'lc-status-rejected';
-      case 'pending':  return 'lc-status-pending';
-      default:         return 'lc-status-other';
+      case 'approved': return '#22c55e';
+      case 'rejected': return '#ef4444';
+      case 'pending': return '#f59e0b';
+      default: return '#666666';
     }
   };
 
   const formatDate = (d) =>
     d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
 
-  /* ----------------------- calendar array ------------------------- */
   const calendarDays = useMemo(() => {
     const m = currentDate.getMonth();
     const y = currentDate.getFullYear();
-
-    const first   = new Date(y, m, 1);
-    const prefix  = first.getDay();              // empty slots before 1st
+    const first = new Date(y, m, 1);
+    const prefix = first.getDay();
     const daysCnt = new Date(y, m + 1, 0).getDate();
 
     return [
@@ -67,73 +63,235 @@ export default function LeaveCalendar({ leaves = [] }) {
     ];
   }, [currentDate]);
 
-  /* ----------------------- KPI counters --------------------------- */
   const kpiApproved = processedLeaves.filter((l) => l.status.toLowerCase() === 'approved').length;
   const kpiRejected = processedLeaves.filter((l) => l.status.toLowerCase() === 'rejected').length;
-  const kpiPending  = processedLeaves.filter((l) => l.status.toLowerCase() === 'pending').length;
+  const kpiPending = processedLeaves.filter((l) => l.status.toLowerCase() === 'pending').length;
 
   return (
-    <div className="lc-container">
-      {/* header */}
-      <header className="lc-header">
-        <h2 className="lc-title">
-          <Calendar size={22} /> Leave Calendar
-        </h2>
-
-        <div className="lc-month-nav">
-          <button className="lc-nav-btn" onClick={() => navigateMonth(-1)}>
-            <ChevronLeft size={18} />
+    <div style={{
+      background: '#1e1e1e',
+      border: '1px solid #333333',
+      borderRadius: '12px',
+      padding: '20px',
+      color: '#ffffff',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+      marginTop: '20px'
+    }}>
+      {/* Header */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '16px',
+        paddingBottom: '16px',
+        borderBottom: '1px solid #333333'
+      }}>
+        <h3 style={{ 
+          margin: 0, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px',
+          fontSize: '18px',
+          fontWeight: '600'
+        }}>
+          <Calendar size={18} />
+          Team Leave Calendar
+        </h3>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={() => navigateMonth(-1)}
+            style={{
+              background: 'none',
+              border: '1px solid #333333',
+              color: '#ffffff',
+              padding: '6px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = '#8b5cf6';
+              e.target.style.background = 'rgba(139, 92, 246, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = '#333333';
+              e.target.style.background = 'none';
+            }}
+          >
+            <ChevronLeft size={16} />
           </button>
-          <span className="lc-month-label">
+          
+          <span style={{ 
+            fontSize: '16px', 
+            fontWeight: '600',
+            minWidth: '140px',
+            textAlign: 'center'
+          }}>
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </span>
-          <button className="lc-nav-btn" onClick={() => navigateMonth(1)}>
-            <ChevronRight size={18} />
+          
+          <button
+            onClick={() => navigateMonth(1)}
+            style={{
+              background: 'none',
+              border: '1px solid #333333',
+              color: '#ffffff',
+              padding: '6px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = '#8b5cf6';
+              e.target.style.background = 'rgba(139, 92, 246, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = '#333333';
+              e.target.style.background = 'none';
+            }}
+          >
+            <ChevronRight size={16} />
           </button>
         </div>
-      </header>
-
-      {/* legend */}
-      <div className="lc-legend">
-        {['approved', 'rejected', 'pending'].map((st) => (
-          <div key={st} className="lc-legend-item">
-            <span className={`lc-legend-dot ${getStatusColourClass(st)}`} />
-            <span className="lc-legend-text">{st}</span>
-          </div>
-        ))}
       </div>
 
-      {/* grid */}
-      <div className="lc-grid">
-        {dayNames.map((d) => (
-          <div key={d} className="lc-day-header">{d}</div>
+      {/* Legend & KPIs in one row */}
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        marginBottom: '16px',
+        flexWrap: 'wrap',
+        gap: '12px'
+      }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          {['approved', 'rejected', 'pending'].map((status) => (
+            <div key={status} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                backgroundColor: getStatusColor(status)
+              }} />
+              <span style={{ 
+                fontSize: '12px', 
+                color: '#b3b3b3',
+                textTransform: 'capitalize'
+              }}>
+                {status}
+              </span>
+            </div>
+          ))}
+        </div>
+        
+        <div style={{ display: 'flex', gap: '12px', fontSize: '12px' }}>
+          <span style={{ color: '#22c55e' }}>✓ {kpiApproved}</span>
+          <span style={{ color: '#ef4444' }}>✗ {kpiRejected}</span>
+          <span style={{ color: '#f59e0b' }}>⏳ {kpiPending}</span>
+          <span style={{ color: '#b3b3b3' }}>Total: {processedLeaves.length}</span>
+        </div>
+      </div>
+
+      {/* Calendar Grid */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(7, 1fr)',
+        gap: '1px',
+        background: '#333333',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        position: 'relative'
+      }}>
+        {/* Day headers */}
+        {dayNames.map((day) => (
+          <div
+            key={day}
+            style={{
+              background: '#1a1a1a',
+              padding: '8px 4px',
+              textAlign: 'center',
+              fontSize: '11px',
+              fontWeight: '600',
+              color: '#b3b3b3',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px'
+            }}
+          >
+            {day}
+          </div>
         ))}
 
+        {/* Calendar days */}
         {calendarDays.map((day, idx) => {
-          if (!day) return <div key={idx} className="lc-day-empty" />;
+          if (!day) {
+            return (
+              <div
+                key={idx}
+                style={{
+                  background: '#0d0d0d',
+                  minHeight: '32px'
+                }}
+              />
+            );
+          }
 
-          const items   = getLeavesForDate(day);
-          const isToday = day.toDateString() === (new Date()).toDateString();
+          const dayLeaves = getLeavesForDate(day);
+          const isToday = day.toDateString() === new Date().toDateString();
 
           return (
             <div
               key={idx}
-              className={`lc-day-cell ${isToday ? 'lc-day-today' : ''}`}
-              onMouseEnter={() => items.length && setHoveredLeave({ date: day, leaves: items })}
+              style={{
+                background: isToday ? '#1a1a2e' : '#1e1e1e',
+                minHeight: '32px',
+                padding: '4px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                cursor: dayLeaves.length > 0 ? 'pointer' : 'default',
+                position: 'relative',
+                border: isToday ? '1px solid #8b5cf6' : 'none'
+              }}
+              onMouseEnter={() => dayLeaves.length && setHoveredLeave({ date: day, leaves: dayLeaves })}
               onMouseLeave={() => setHoveredLeave(null)}
             >
-              <span className="lc-day-number">{day.getDate()}</span>
+              <span style={{
+                fontSize: '12px',
+                fontWeight: isToday ? '600' : '400',
+                color: isToday ? '#8b5cf6' : '#ffffff',
+                marginBottom: '2px'
+              }}>
+                {day.getDate()}
+              </span>
 
-              {items.length > 0 && (
-                <div className="lc-dots-wrapper">
-                  {items.slice(0, 2).map((lv, i) => (
-                    <span
+              {dayLeaves.length > 0 && (
+                <div style={{ display: 'flex', gap: '2px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {dayLeaves.slice(0, 3).map((leave, i) => (
+                    <div
                       key={i}
-                      className={`lc-dot ${getStatusColourClass(lv.status)}`}
+                      style={{
+                        width: '4px',
+                        height: '4px',
+                        borderRadius: '50%',
+                        backgroundColor: getStatusColor(leave.status)
+                      }}
                     />
                   ))}
-                  {items.length > 2 && (
-                    <span className="lc-more">+{items.length - 2}</span>
+                  {dayLeaves.length > 3 && (
+                    <span style={{ 
+                      fontSize: '8px', 
+                      color: '#b3b3b3',
+                      fontWeight: '600'
+                    }}>
+                      +{dayLeaves.length - 3}
+                    </span>
                   )}
                 </div>
               )}
@@ -142,45 +300,92 @@ export default function LeaveCalendar({ leaves = [] }) {
         })}
       </div>
 
-      {/* tooltip */}
+      {/* Tooltip */}
       {hoveredLeave && (
-        <div className="lc-tooltip">
-          <h4 className="lc-tooltip-title">
-            <Calendar size={14} /> {formatDate(hoveredLeave.date)}
-          </h4>
-          <div className="lc-tooltip-body">
-            {hoveredLeave.leaves.map((lv, i) => (
-              <div key={i} className="lc-tooltip-item">
-                <div className="lc-tooltip-status">
-                  <span className={`lc-dot ${getStatusColourClass(lv.status)}`} />
-                  <span className="lc-tooltip-status-text">{lv.status}</span>
+        <div style={{
+          position: 'fixed',
+          background: '#0d0d0d',
+          border: '1px solid #333333',
+          borderRadius: '8px',
+          padding: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+          zIndex: 1000,
+          minWidth: '250px',
+          maxWidth: '350px',
+          pointerEvents: 'none',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            marginBottom: '8px',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: '#ffffff'
+          }}>
+            <Calendar size={12} />
+            {formatDate(hoveredLeave.date)}
+          </div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {hoveredLeave.leaves.map((leave, i) => (
+              <div
+                key={i}
+                style={{
+                  background: '#1a1a1a',
+                  padding: '8px',
+                  borderRadius: '6px',
+                  borderLeft: `3px solid ${getStatusColor(leave.status)}`
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '4px'
+                }}>
+                  <span style={{
+                    fontSize: '12px',
+                    color: getStatusColor(leave.status),
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px'
+                  }}>
+                    {leave.status}
+                  </span>
                 </div>
-                <div className="lc-tooltip-info">
-                  <div><User size={12}/> {lv.userId}</div>
-                  <div><Clock size={12}/> {formatDate(lv.fromDate)} - {formatDate(lv.toDate)}</div>
-                  <div><b>Type:</b> {lv.type}</div>
-                  {lv.reason && <div><b>Reason:</b> {lv.reason}</div>}
+                
+                <div style={{ fontSize: '12px', color: '#b3b3b3', lineHeight: '1.4' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+                    <User size={10} />
+                    <span style={{ color: '#ffffff', fontWeight: '500' }}>
+                      {leave.userName || leave.userId}
+                    </span>
+                  </div>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
+                    <Clock size={10} />
+                    {formatDate(leave.fromDate)} - {formatDate(leave.toDate)}
+                  </div>
+                  
+                  <div style={{ marginTop: '4px' }}>
+                    <strong style={{ color: '#ffffff' }}>Type:</strong> {leave.type}
+                  </div>
+                  
+                  {leave.reason && (
+                    <div style={{ marginTop: '2px' }}>
+                      <strong style={{ color: '#ffffff' }}>Reason:</strong> {leave.reason}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
       )}
-
-      {/* KPI bar */}
-      <div className="lc-kpi-grid">
-        {[
-          { label: 'Approved', val: kpiApproved, cls: 'lc-kpi-approved' },
-          { label: 'Rejected', val: kpiRejected, cls: 'lc-kpi-rejected' },
-          { label: 'Pending',  val: kpiPending,  cls: 'lc-kpi-pending'  },
-          { label: 'Total',    val: processedLeaves.length, cls: 'lc-kpi-total' },
-        ].map((k) => (
-          <div key={k.label} className={`lc-kpi-card ${k.cls}`}>
-            <div className="lc-kpi-label">{k.label}</div>
-            <div className="lc-kpi-value">{k.val}</div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

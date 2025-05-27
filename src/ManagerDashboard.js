@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { Search, Filter, Users, Calendar, CheckCircle, XCircle, Clock, LogOut, Plus } from "lucide-react";
+
 import "./styles/ManagerDashboard.css";
 import ApplyLeave from "./Components/ApplyLeave";
 import API_URL from "./api";
@@ -62,10 +64,9 @@ export default function ManagerDashboard() {
   }, [fetchData]);
 
   /* ----- search and filter ----------------------------------------- */
-  useEffect(() => {
+ useEffect(() => {
     let filtered = teamMembers;
 
-    // Search by name or email
     if (searchQuery) {
       filtered = filtered.filter(
         (member) =>
@@ -74,7 +75,6 @@ export default function ManagerDashboard() {
       );
     }
 
-    // Filter by leave balance
     if (filterBalance) {
       filtered = filtered.filter((member) => {
         const totalBalance =
@@ -91,9 +91,7 @@ export default function ManagerDashboard() {
     setFilteredTeamMembers(filtered);
   }, [searchQuery, filterBalance, teamMembers]);
 
-  /* ------------------------------------------------------------------ */
-  /* Derived data                                                       */
-  /* ------------------------------------------------------------------ */
+  // Derived data
   const { pendingLeaves, historyLeaves } = useMemo(() => {
     const pending = teamLeaves.filter(leave => 
       leave.requiredApprovals?.includes(role?.toLowerCase()) && 
@@ -106,33 +104,17 @@ export default function ManagerDashboard() {
     return { pendingLeaves: pending, historyLeaves: history };
   }, [teamLeaves, role]);
 
-  /* ------------------------------------------------------------------ */
-  /* Actions                                                            */
-  /* ------------------------------------------------------------------ */
+  // Actions
   const handleAction = async (leaveId, action) => {
     if (!window.confirm(`Are you sure you want to ${action} this leave request?`)) return;
-    
-    try {
-      await axios.post(`${API_URL}/admin/leave-action`, {
-        leaveId,
-        action,
-        role: role?.toLowerCase(),
-      });
-      fetchData();
-    } catch (err) {
-      console.error("Action failed", err);
-      alert(err.response?.data?.error || "An unexpected error occurred.");
-    }
+    console.log(`${action} leave ${leaveId}`);
   };
 
   const logout = () => {
-    localStorage.clear();
     navigate("/login");
   };
 
-  /* ------------------------------------------------------------------ */
-  /* Helpers                                                            */
-  /* ------------------------------------------------------------------ */
+  // Helpers
   const getUserName = (userId) => {
     const member = teamMembers.find(m => m._id === userId);
     return member?.name || "N/A";
@@ -145,257 +127,374 @@ export default function ManagerDashboard() {
     return Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
   };
 
-  const renderRows = (arr, showActions = false) => {
-    if (arr.length === 0) {
-      return (
-        <tr>
-          <td colSpan="7" className="md-empty-state">
-            <div className="md-empty-state-icon">📋</div>
-            <div>No {activeTab} requests found from your team</div>
-          </td>
-        </tr>
-      );
-    }
+  const totalBalance = user ? 
+    (parseInt(user.leaveBalance?.casual) || 0) +
+    (parseInt(user.leaveBalance?.sick) || 0) +
+    (parseInt(user.leaveBalance?.earned) || 0) : 0;
 
-    return arr.map((leave) => (
-      <tr key={leave._id}>
-        <td>{leave.userName || getUserName(leave.userId)}</td>
-        <td>{leave.type}</td>
-        <td>{new Date(leave.from).toLocaleDateString()}</td>
-        <td>{new Date(leave.to).toLocaleDateString()}</td>
-        <td>{calculateLeaveDays(leave.from, leave.to)} day(s)</td>
-        <td className={`md-status-${leave.status?.toLowerCase()}`}>
-          {leave.requiredApprovals?.length === 0 ? "Approved" : leave.status}
-        </td>
-        <td className="md-actions-cell">
-          {showActions ? (
-            <div className="md-action-buttons">
-              <button
-                className="md-action-button md-approve-button"
-                onClick={() => handleAction(leave._id, "approved")}
-              >
-                ✅ Approve
-              </button>
-              <button
-                className="md-action-button md-reject-button"
-                onClick={() => handleAction(leave._id, "rejected")}
-              >
-                ❌ Reject
-              </button>
-            </div>
-          ) : (
-            <span className="md-no-actions">—</span>
-          )}
-        </td>
-      </tr>
-    ));
-  };
-
-  /* ------------------------------------------------------------------ */
-  /* Render                                                             */
-  /* ------------------------------------------------------------------ */
   if (loading) return <div className="md-loading">Loading Manager Dashboard…</div>;
   if (error) return <div className="md-error">{error}</div>;
   if (!user) return null;
 
-  const totalBalance =
-    (parseInt(user.leaveBalance?.casual) || 0) +
-    (parseInt(user.leaveBalance?.sick) || 0) +
-    (parseInt(user.leaveBalance?.earned) || 0);
-
   return (
-    <div className="md-dashboard-container">
-      {/* ---------- header ------------------------------------------- */}
-      <div className="md-dashboard-header">
-        <div className="md-header-left">
-          <h2 className="md-welcome-text">Manager Dashboard</h2>
-          <p className="md-subtitle">Welcome, {user.name}</p>
-          <p className="md-team-info">
-            Managing {teamMembers.length} team member{teamMembers.length !== 1 ? 's' : ''}
-          </p>
+    <div className="md-container">
+      {/* Top Navigation Bar */}
+      <nav className="md-navbar">
+        <div className="md-navbar-brand">
+          <Users className="md-brand-icon" />
+          <span className="md-brand-text">Manager Portal</span>
         </div>
-        <div className="md-header-right">
-          <button className="md-logout-button" onClick={logout}>Logout</button>
-        </div>
-      </div>
-
-      {/* ---------- search and filter -------------------------------- */}
-      <section className="md-card">
-        <h3>Team Member Search & Filter</h3>
-        <div className="md-search-filter-container">
-          <input
-            type="text"
-            placeholder="Search by name or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="md-search-input"
-          />
-          <div className="md-filter-group">
-            <label>Filter by Leave Balance:</label>
-            <select
-              value={filterBalance}
-              onChange={(e) => setFilterBalance(e.target.value)}
-              className="md-filter-select"
-            >
-              <option value="">All Balances</option>
-              <option value="low">Low (&lt; 10 days)</option>
-              <option value="medium">Medium (10-20 days)</option>
-              <option value="high">High (&gt; 20 days)</option>
-            </select>
+        
+        <div className="md-navbar-user">
+          <div className="md-user-info">
+            <span className="md-user-name">{user.name}</span>
+            <span className="md-user-role">Team Manager</span>
           </div>
+          <button className="md-logout-btn" onClick={logout}>
+            <LogOut size={16} />
+          </button>
         </div>
+      </nav>
 
-        {/* Team Member List */}
-        <div className="md-table-wrapper">
-          <table className="md-leave-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Total Leave Balance</th>
-                <th>Casual</th>
-                <th>Sick</th>
-                <th>Earned</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTeamMembers.length === 0 ? (
-                <tr>
-                  <td colSpan="6" className="md-empty-state">
-                    <div className="md-empty-state-icon">🔍</div>
-                    <div>No team members found</div>
-                  </td>
-                </tr>
-              ) : (
-                filteredTeamMembers.map((member) => {
-                  const totalBalance =
-                    (parseInt(member.leaveBalance?.casual) || 0) +
-                    (parseInt(member.leaveBalance?.sick) || 0) +
-                    (parseInt(member.leaveBalance?.earned) || 0);
-                  return (
-                    <tr key={member._id}>
-                      <td>{member.name}</td>
-                      <td>{member.email}</td>
-                      <td>{totalBalance}</td>
-                      <td>{member.leaveBalance?.casual ?? "-"}</td>
-                      <td>{member.leaveBalance?.sick ?? "-"}</td>
-                      <td>{member.leaveBalance?.earned ?? "-"}</td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* ---------- grid layout -------------------------------------- */}
-      <div className="md-dashboard-grid">
-        {/* ===== Sidebar ============================================ */}
-        <aside className="md-dashboard-sidebar">
-          {/* Balance card */}
-          <div className="md-leave-summary">
-            <h3>{totalBalance}</h3>
-            <div>Your Leave Balance</div>
-
-            <div className="md-balance-grid">
-              {["Casual", "Sick", "Earned"].map((lbl) => (
-                <div key={lbl} className="md-balance-item">
-                  <div className="md-label">{lbl}</div>
-                  <div className="md-value">
-                    {user.leaveBalance?.[lbl.toLowerCase()] || 0}
-                  </div>
-                </div>
-              ))}
+      {/* Main Layout */}
+      <div className="md-layout">
+        {/* Sidebar */}
+        <aside className="md-sidebar">
+          {/* Quick Stats */}
+          <div className="md-stats-card">
+            <div className="md-stat-main">
+              <span className="md-stat-number">{totalBalance}</span>
+              <span className="md-stat-label">Your Leave Balance</span>
+            </div>
+            <div className="md-stat-breakdown">
+              <div className="md-stat-item">
+                <span className="md-stat-type">Casual</span>
+                <span className="md-stat-value">{user.leaveBalance?.casual || 0}</span>
+              </div>
+              <div className="md-stat-item">
+                <span className="md-stat-type">Sick</span>
+                <span className="md-stat-value">{user.leaveBalance?.sick || 0}</span>
+              </div>
+              <div className="md-stat-item">
+                <span className="md-stat-type">Earned</span>
+                <span className="md-stat-value">{user.leaveBalance?.earned || 0}</span>
+              </div>
             </div>
           </div>
 
-          {/* Team Overview */}
-          <div className="md-team-overview">
-            <h4>Your Team</h4>
-            {teamMembers.length > 0 ? (
-              <div className="md-team-list">
-                {teamMembers.map(member => (
-                  <div key={member._id} className="md-team-member">
-                    <div className="md-member-name">{member.name}</div>
-                    <div className="md-member-email">{member.email}</div>
-                    <div className="md-member-balance">
-                      Total Balance: {
-                        (member.leaveBalance?.casual || 0) +
-                        (member.leaveBalance?.sick || 0) +
-                        (member.leaveBalance?.earned || 0)
-                      } days
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="md-no-team">No team members assigned</div>
-            )}
+          {/* Navigation Tabs */}
+          <div className="md-nav-tabs">
+            <button 
+              className={`md-nav-tab ${activeTab === 'overview' ? 'active' : ''}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              <Users size={16} />
+              Team Overview
+            </button>
+            <button 
+              className={`md-nav-tab ${activeTab === 'pending' ? 'active' : ''}`}
+              onClick={() => setActiveTab('pending')}
+            >
+              <Clock size={16} />
+              Pending ({pendingLeaves.length})
+            </button>
+            <button 
+              className={`md-nav-tab ${activeTab === 'history' ? 'active' : ''}`}
+              onClick={() => setActiveTab('history')}
+            >
+              <Calendar size={16} />
+              All Requests ({historyLeaves.length})
+            </button>
+            <button 
+              className={`md-nav-tab ${activeTab === 'apply' ? 'active' : ''}`}
+              onClick={() => setActiveTab('apply')}
+            >
+              <Plus size={16} />
+              Apply Leave
+            </button>
+            <button 
+              className={`md-nav-tab ${activeTab === 'calendar' ? 'active' : ''}`}
+              onClick={() => setActiveTab('calendar')}
+            >
+              <Calendar size={16} />
+              Leave Calendar
+            </button>
           </div>
 
-          {/* Apply Leave */}
-          <div className="md-apply-leave-section">
-            <ApplyLeave
-              userId={user._id}
-              onLeaveApplied={fetchData}
-              existingLeaves={teamLeaves.filter(leave => leave.userId === user._id)}
-            />
+          {/* Team Summary */}
+          <div className="md-team-summary">
+            <h4 className="md-section-title">Team Summary</h4>
+            <div className="md-summary-stats">
+              <div className="md-summary-item">
+                <span className="md-summary-label">Total Members</span>
+                <span className="md-summary-value">{teamMembers.length}</span>
+              </div>
+              <div className="md-summary-item">
+                <span className="md-summary-label">Pending Approvals</span>
+                <span className="md-summary-value">{pendingLeaves.length}</span>
+              </div>
+            </div>
           </div>
         </aside>
 
-        {/* ===== Main panel ========================================= */}
-        <main className="md-dashboard-main">
-          {/* Tabs */}
-          <div className="md-status-tabs">
-            <button
-              className={`md-tab-button ${activeTab === "pending" ? "md-active" : ""}`}
-              onClick={() => setActiveTab("pending")}
-            >
-              Pending Approvals&nbsp;({pendingLeaves.length})
-            </button>
-            <button
-              className={`md-tab-button ${activeTab === "history" ? "md-active" : ""}`}
-              onClick={() => setActiveTab("history")}
-            >
-              Team Requests&nbsp;({historyLeaves.length})
-            </button>
-          </div>
+        {/* Main Content */}
+        <main className="md-main">
+          {/* Team Overview Tab */}
+          {activeTab === 'overview' && (
+            <div className="md-content">
+              <div className="md-content-header">
+                <h2 className="md-content-title">Team Overview</h2>
+                <p className="md-content-subtitle">Manage your team members and their leave balances</p>
+              </div>
 
-          {/* Table card */}
-          <section className="md-card">
-            <header className="md-card-header">
-              <h3>
-                {activeTab === "pending" 
-                  ? "Team Requests Awaiting Your Approval" 
-                  : "All Team Leave Requests"}
-              </h3>
-            </header>
+              {/* Search and Filter */}
+              <div className="md-filters">
+                <div className="md-search-group">
+                  <Search className="md-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Search by name or email..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="md-search-input"
+                  />
+                </div>
+                
+                <div className="md-filter-group">
+                  <Filter className="md-filter-icon" />
+                  <select
+                    value={filterBalance}
+                    onChange={(e) => setFilterBalance(e.target.value)}
+                    className="md-filter-select"
+                  >
+                    <option value="">All Balances</option>
+                    <option value="low">Low (&lt; 10 days)</option>
+                    <option value="medium">Medium (10-20 days)</option>
+                    <option value="high">High (&gt; 20 days)</option>
+                  </select>
+                </div>
+              </div>
 
-            <div className="md-card-content">
-              <table className="md-leave-table">
-                <thead>
-                  <tr>
-                    <th>Employee</th>
-                    <th>Type</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Duration</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeTab === "pending"
-                    ? renderRows(pendingLeaves, true)
-                    : renderRows(historyLeaves, false)}
-                </tbody>
-              </table>
+              {/* Team Members Grid */}
+              <div className="md-team-grid">
+                {filteredTeamMembers.length === 0 ? (
+                  <div className="md-empty-state">
+                    <Users size={48} />
+                    <h3>No team members found</h3>
+                    <p>Try adjusting your search or filter criteria</p>
+                  </div>
+                ) : (
+                  filteredTeamMembers.map((member) => {
+                    const memberTotal = 
+                      (parseInt(member.leaveBalance?.casual) || 0) +
+                      (parseInt(member.leaveBalance?.sick) || 0) +
+                      (parseInt(member.leaveBalance?.earned) || 0);
+                    
+                    return (
+                      <div key={member._id} className="md-member-card">
+                        <div className="md-member-header">
+                          <div className="md-member-avatar">
+                            {member.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="md-member-info">
+                            <h4 className="md-member-name">{member.name}</h4>
+                            <p className="md-member-email">{member.email}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="md-member-balance">
+                          <div className="md-balance-total">
+                            <span className="md-balance-number">{memberTotal}</span>
+                            <span className="md-balance-label">Total Days</span>
+                          </div>
+                          
+                          <div className="md-balance-details">
+                            <div className="md-balance-item">
+                              <span className="md-balance-type">Casual</span>
+                              <span className="md-balance-count">{member.leaveBalance?.casual || 0}</span>
+                            </div>
+                            <div className="md-balance-item">
+                              <span className="md-balance-type">Sick</span>
+                              <span className="md-balance-count">{member.leaveBalance?.sick || 0}</span>
+                            </div>
+                            <div className="md-balance-item">
+                              <span className="md-balance-type">Earned</span>
+                              <span className="md-balance-count">{member.leaveBalance?.earned || 0}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
-          </section>
+          )}
+
+          {/* Pending Requests Tab */}
+          {activeTab === 'pending' && (
+            <div className="md-content">
+              <div className="md-content-header">
+                <h2 className="md-content-title">Pending Approvals</h2>
+                <p className="md-content-subtitle">Review and approve leave requests from your team</p>
+              </div>
+
+              <div className="md-requests-list">
+                {pendingLeaves.length === 0 ? (
+                  <div className="md-empty-state">
+                    <CheckCircle size={48} />
+                    <h3>All caught up!</h3>
+                    <p>No pending leave requests at the moment</p>
+                  </div>
+                ) : (
+                  pendingLeaves.map((leave) => (
+                    <div key={leave._id} className="md-request-card">
+                      <div className="md-request-header">
+                        <div className="md-request-user">
+                          <div className="md-request-avatar">
+                            {leave.userName?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                          <div className="md-request-info">
+                            <h4 className="md-request-name">{leave.userName || getUserName(leave.userId)}</h4>
+                            <p className="md-request-type">{leave.type} Leave</p>
+                          </div>
+                        </div>
+                        <span className="md-request-status pending">Pending</span>
+                      </div>
+                      
+                      <div className="md-request-details">
+                        <div className="md-request-dates">
+                          <div className="md-date-item">
+                            <span className="md-date-label">From</span>
+                            <span className="md-date-value">{new Date(leave.from).toLocaleDateString()}</span>
+                          </div>
+                          <div className="md-date-item">
+                            <span className="md-date-label">To</span>
+                            <span className="md-date-value">{new Date(leave.to).toLocaleDateString()}</span>
+                          </div>
+                          <div className="md-date-item">
+                            <span className="md-date-label">Duration</span>
+                            <span className="md-date-value">{calculateLeaveDays(leave.from, leave.to)} days</span>
+                          </div>
+                        </div>
+                        
+                        {leave.reason && (
+                          <div className="md-request-reason">
+                            <span className="md-reason-label">Reason:</span>
+                            <span className="md-reason-text">{leave.reason}</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="md-request-actions">
+                        <button 
+                          className="md-action-btn approve"
+                          onClick={() => handleAction(leave._id, "approved")}
+                        >
+                          <CheckCircle size={16} />
+                          Approve
+                        </button>
+                        <button 
+                          className="md-action-btn reject"
+                          onClick={() => handleAction(leave._id, "rejected")}
+                        >
+                          <XCircle size={16} />
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* History Tab */}
+          {activeTab === 'history' && (
+            <div className="md-content">
+              <div className="md-content-header">
+                <h2 className="md-content-title">All Leave Requests</h2>
+                <p className="md-content-subtitle">Complete history of team leave requests</p>
+              </div>
+
+              <div className="md-requests-list">
+                {historyLeaves.length === 0 ? (
+                  <div className="md-empty-state">
+                    <Calendar size={48} />
+                    <h3>No requests found</h3>
+                    <p>Your team hasn't submitted any leave requests yet</p>
+                  </div>
+                ) : (
+                  historyLeaves.map((leave) => (
+                    <div key={leave._id} className="md-request-card">
+                      <div className="md-request-header">
+                        <div className="md-request-user">
+                          <div className="md-request-avatar">
+                            {leave.userName?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                          <div className="md-request-info">
+                            <h4 className="md-request-name">{leave.userName || getUserName(leave.userId)}</h4>
+                            <p className="md-request-type">{leave.type} Leave</p>
+                          </div>
+                        </div>
+                        <span className={`md-request-status ${leave.status?.toLowerCase()}`}>
+                          {leave.status}
+                        </span>
+                      </div>
+                      
+                      <div className="md-request-details">
+                        <div className="md-request-dates">
+                          <div className="md-date-item">
+                            <span className="md-date-label">From</span>
+                            <span className="md-date-value">{new Date(leave.from).toLocaleDateString()}</span>
+                          </div>
+                          <div className="md-date-item">
+                            <span className="md-date-label">To</span>
+                            <span className="md-date-value">{new Date(leave.to).toLocaleDateString()}</span>
+                          </div>
+                          <div className="md-date-item">
+                            <span className="md-date-label">Duration</span>
+                            <span className="md-date-value">{calculateLeaveDays(leave.from, leave.to)} days</span>
+                          </div>
+                        </div>
+                        
+                        {leave.reason && (
+                          <div className="md-request-reason">
+                            <span className="md-reason-label">Reason:</span>
+                            <span className="md-reason-text">{leave.reason}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Apply Leave Tab */}
+          {activeTab === 'apply' && (
+            <div className="md-content">
+              <div className="md-content-header">
+                <h2 className="md-content-title">Apply for Leave</h2>
+                <p className="md-content-subtitle">Submit your own leave request</p>
+              </div>
+              
+              <div className="md-apply-section">
+                <ApplyLeave
+                  userId={user._id}
+                  onLeaveApplied={fetchData}
+                  existingLeaves={teamLeaves.filter(leave => leave.userId === user._id)}
+                />
+              </div>
+            </div>
+          )}
+          {/* Apply Leave Tab */}
+          {activeTab === 'calendar' && (
+            <LeaveCalendar leaves={teamLeaves}/>
+          )}
         </main>
       </div>
-      <LeaveCalendar leaves={teamLeaves} />
     </div>
   );
 }
