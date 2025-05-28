@@ -1,133 +1,126 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { User, Users, Calendar, Clock, Search, Filter, CheckCircle, XCircle, LogOut, UserCheck } from "lucide-react";
-import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
-import "./styles/HRDashboard.css";
-import API_URL from "./api";
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { User, Users, Calendar, Clock, Search, Filter, CheckCircle, XCircle, LogOut, UserCheck } from 'lucide-react';
+import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import './styles/HRDashboard.css';
+import API_URL from './api';
+import { User as UserType, Leave, Role, LeaveType } from './types';
+
+interface ApplyLeaveFormProps {
+  userId: string;
+  onLeaveApplied: () => void;
+}
+
 export default function HRDashboard() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [leaves, setLeaves] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  // Missing state variables
-  const [activeTab, setActiveTab] = useState('employees');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterRole, setFilterRole] = useState('');
+  const [user, setUser] = useState<UserType | null>(null);
+  const [leaves, setLeaves] = useState<Leave[]>([]);
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'employees' | 'requests' | 'apply' | 'history'>('employees');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [filterRole, setFilterRole] = useState<Role | ''>('');
 
-  const fetchDatas = useCallback(async () => {
+  const fetchUserData = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/user/${id}`);
+      const res = await axios.get<{ user: UserType; leaves: Leave[] }>(`${API_URL}/user/${id}`);
       setUser(res.data.user);
       setLeaves(res.data.leaves);
-    } catch (error) {
-      console.error("Failed to fetch user data", error);
-      navigate("/login");
+    } catch (error: any) {
+      console.error('Failed to fetch user data', error);
+      navigate('/login');
     }
   }, [id, navigate]);
 
-  const fetchData = useCallback(async () => {
+  const fetchAdminData = useCallback(async () => {
     try {
       setLoading(true);
-      const leaveRes = await axios.get(`${API_URL}/admin/leaves`);
-      const userRes = await axios.get(`${API_URL}/admin/users`);
+      const leaveRes = await axios.get<Leave[]>(`${API_URL}/admin/leaves`);
+      const userRes = await axios.get<UserType[]>(`${API_URL}/admin/users`);
       setLeaves(leaveRes.data);
       setUsers(userRes.data);
       setError(null);
-    } catch (err) {
-      setError("Failed to fetch admin data. Please try again later.");
+    } catch (err: any) {
+      setError('Failed to fetch admin data. Please try again later.');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchDatas();
-    fetchData();
-  }, [fetchDatas, fetchData]);
+    fetchUserData();
+    fetchAdminData();
+  }, [fetchUserData, fetchAdminData]);
 
-  const handleAction = async (leaveId, action, role) => {
-    console.log("Attempting action:", action, "with role:", role);
-    if (
-      !window.confirm(`Are you sure you want to ${action} this leave request?`)
-    )
-      return;
+  const handleAction = async (leaveId: string, action: 'approved' | 'rejected', role: Role = 'hr'): Promise<void> => {
+    if (!window.confirm(`Are you sure you want to ${action} this leave request?`)) return;
     try {
-      await axios.post(`${API_URL}/admin/leave-action`, {
-        leaveId,
-        action,
-        role,
-      });
-      fetchData();
-    } catch (err) {
-      console.error("Action failed", err);
-      if (err.response) {
-        alert(`Error: ${err.response.data.error}`);
-      } else {
-        alert("An unexpected error occurred.");
-      }
+      await axios.post(`${API_URL}/admin/leave-action`, { leaveId, action, role });
+      fetchAdminData();
+    } catch (err: any) {
+      console.error('Action failed', err);
+      alert(err.response?.data?.error || 'An unexpected error occurred.');
     }
   };
 
-  const logout = () => {
+  const logout = (): void => {
     localStorage.clear();
-    navigate("/login");
+    navigate('/login');
   };
 
-  // Computed values using useMemo for better performance
   const userTotalBalance = useMemo(() => {
     if (!user?.leaveBalance) return 0;
-    return (parseInt(user.leaveBalance.casual) || 0) +
-           (parseInt(user.leaveBalance.sick) || 0) +
-           (parseInt(user.leaveBalance.earned) || 0);
+    return (
+      (parseInt(user.leaveBalance.casual.toString()) || 0) +
+      (parseInt(user.leaveBalance.sick.toString()) || 0) +
+      (parseInt(user.leaveBalance.earned.toString()) || 0)
+    );
   }, [user?.leaveBalance]);
 
   const filteredUsers = useMemo(() => {
-    return users.filter(employee => {
-      const matchesSearch = searchQuery === '' || 
+    return users.filter((employee) => {
+      const matchesSearch =
+        searchQuery === '' ||
         employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         employee.email.toLowerCase().includes(searchQuery.toLowerCase());
-      
       const matchesRole = filterRole === '' || employee.role === filterRole;
-      
       return matchesSearch && matchesRole;
     });
   }, [users, searchQuery, filterRole]);
 
   const totalEmployees = users.length;
-  const pendingRequests = leaves.filter(leave => 
-    leave.status === 'pending' || (leave.requiredApprovals && leave.requiredApprovals.length > 0)
+  const pendingRequests = leaves.filter(
+    (leave) => leave.status === 'pending' || (leave.requiredApprovals && leave.requiredApprovals.length > 0)
   ).length;
-  
-  const approvedToday = leaves.filter(leave => {
+  const approvedToday = leaves.filter((leave) => {
     const today = new Date().toDateString();
-    const leaveDate = new Date(leave.updatedAt || leave.createdAt).toDateString();
+    const leaveDate = new Date(leave.updatedAt ?? leave.createdAt ?? '').toDateString();
     return leave.status === 'approved' && leaveDate === today;
   }).length;
 
-  // ApplyLeaveForm component (assuming it should be inline since ApplyLeave import might not match)
-  const ApplyLeaveForm = ({ userId, onLeaveApplied }) => {
-    const [formData, setFormData] = useState({
+  const ApplyLeaveForm: React.FC<ApplyLeaveFormProps> = ({ userId, onLeaveApplied }) => {
+    const [formData, setFormData] = useState<{
+      type: LeaveType;
+      from: string;
+      to: string;
+      reason: string;
+    }>({
       type: 'casual',
       from: '',
       to: '',
-      reason: ''
+      reason: '',
     });
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
       e.preventDefault();
       try {
-        await axios.post(`${API_URL}/leave/apply`, {
-          ...formData,
-          userId
-        });
+        await axios.post(`${API_URL}/leave/apply`, { ...formData, userId });
         setFormData({ type: 'casual', from: '', to: '', reason: '' });
         onLeaveApplied();
         alert('Leave application submitted successfully!');
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to apply leave:', error);
         alert('Failed to submit leave application. Please try again.');
       }
@@ -139,7 +132,7 @@ export default function HRDashboard() {
           <label className="hr-form-label">Leave Type</label>
           <select
             value={formData.type}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, type: e.target.value as LeaveType })}
             className="hr-form-select"
             required
           >
@@ -148,7 +141,7 @@ export default function HRDashboard() {
             <option value="earned">Earned Leave</option>
           </select>
         </div>
-        
+
         <div className="hr-form-row">
           <div className="hr-form-group">
             <label className="hr-form-label">From Date</label>
@@ -160,7 +153,7 @@ export default function HRDashboard() {
               required
             />
           </div>
-          
+
           <div className="hr-form-group">
             <label className="hr-form-label">To Date</label>
             <input
@@ -172,7 +165,7 @@ export default function HRDashboard() {
             />
           </div>
         </div>
-        
+
         <div className="hr-form-group">
           <label className="hr-form-label">Reason</label>
           <textarea
@@ -180,10 +173,10 @@ export default function HRDashboard() {
             onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
             className="hr-form-textarea"
             placeholder="Enter reason for leave..."
-            rows="3"
+            rows={3}
           />
         </div>
-        
+
         <button type="submit" className="hr-form-submit">
           Submit Leave Application
         </button>
@@ -323,7 +316,7 @@ export default function HRDashboard() {
                     <Filter className="hr-filter-icon" size={18} />
                     <select
                       value={filterRole}
-                      onChange={(e) => setFilterRole(e.target.value)}
+                      onChange={(e) => setFilterRole(e.target.value as Role | '')}
                       className="hr-filter-select"
                     >
                       <option value="">All Roles</option>
@@ -345,9 +338,10 @@ export default function HRDashboard() {
                     </div>
                   ) : (
                     filteredUsers.map((employee) => {
-                      const totalBalance = (parseInt(employee.leaveBalance?.casual) || 0) +
-                                         (parseInt(employee.leaveBalance?.sick) || 0) +
-                                         (parseInt(employee.leaveBalance?.earned) || 0);
+                      const totalBalance =
+                        (parseInt((employee.leaveBalance?.casual ?? "0").toString()) || 0) +
+                        (parseInt((employee.leaveBalance?.sick ?? "0").toString()) || 0) +
+                        (parseInt((employee.leaveBalance?.earned ?? "0").toString()) || 0);
                       return (
                         <div key={employee._id} className="hr-member-card">
                           <div className="hr-member-header">
@@ -409,8 +403,9 @@ export default function HRDashboard() {
                   ) : (
                     leaves.map((leave) => {
                       const employee = users.find((u) => u._id === leave.userId);
-                      const isPending = leave.status === 'pending' || (leave.requiredApprovals && leave.requiredApprovals.length > 0);
-                      
+                      const isPending =
+                        leave.status === 'pending' || (leave.requiredApprovals && leave.requiredApprovals.length > 0);
+
                       return (
                         <div key={leave._id} className="hr-request-card">
                           <div className="hr-request-header">
@@ -427,7 +422,7 @@ export default function HRDashboard() {
                               {isPending ? 'pending' : leave.status}
                             </div>
                           </div>
-                          
+
                           <div className="hr-request-details">
                             <div className="hr-request-dates">
                               <div className="hr-date-item">
@@ -445,11 +440,11 @@ export default function HRDashboard() {
                               <div className="hr-date-item">
                                 <span className="hr-date-label">Duration</span>
                                 <span className="hr-date-value">
-                                  {Math.ceil((new Date(leave.to) - new Date(leave.from)) / (1000 * 60 * 60 * 24)) + 1} days
+                                  {Math.ceil((new Date(leave.to).getTime() - new Date(leave.from).getTime()) / (1000 * 60 * 60 * 24)) + 1} days
                                 </span>
                               </div>
                             </div>
-                            
+
                             {leave.reason && (
                               <div className="hr-request-reason">
                                 <span className="hr-reason-label">Reason:</span>
@@ -492,7 +487,7 @@ export default function HRDashboard() {
                     Submit your leave application. Your request will be processed according to company policy.
                   </p>
                 </div>
-                <ApplyLeaveForm userId={user._id} onLeaveApplied={fetchData} />
+                <ApplyLeaveForm userId={user._id} onLeaveApplied={fetchAdminData} />
               </>
             )}
 

@@ -1,70 +1,102 @@
-import React, { useState } from "react";
-import axios from "axios";
-import API_URL from "../api";
-import "../styles/CreateEmployee.css";
+import React, { useState } from 'react';
+import axios from 'axios';
 
-export default function CreateEmployee({ managers, onCreated, onClose }) {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role: "employee",
-    managerId: "", // Add manager assignment
-    casual: 10, // Set default values
+import API_URL from '../api';
+import '../styles/CreateEmployee.css';
+import { User, Role, LeaveBalance } from '../types';
+
+interface CreateEmployeeProps {
+  managers: User[];
+  onCreated: () => void;
+  onClose: () => void;
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  password: string;
+  role: Role;
+  managerId: string;
+  casual: number;
+  sick: number;
+  earned: number;
+}
+
+export default function CreateEmployee({ managers, onCreated, onClose }: CreateEmployeeProps) {
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    password: '',
+    role: 'employee',
+    managerId: '',
+    casual: 10,
     sick: 5,
-    earned: 15,
+    earned: 1,
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ): void => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name in ['casual', 'sick', 'earned'] ? parseInt(value) || 0 : value,
+    }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      const payload = {
+      const payload: {
+        name: string;
+        email: string;
+        password: string;
+        role: Role;
+        leaveBalance: LeaveBalance;
+        managerId?: string;
+      } = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
         role: formData.role,
         leaveBalance: {
-          casual: parseInt(formData.casual),
-          sick: parseInt(formData.sick),
-          earned: parseInt(formData.earned),
-          updatedAt: new Date(),
+          casual: formData.casual,
+          sick: formData.sick,
+          earned: formData.earned,
+          updatedAt: new Date().toISOString(),
         },
       };
 
       // Only add managerId if role is employee and managerId is selected
-      if (formData.role === "employee" && formData.managerId) {
+      if (formData.role === 'employee' && formData.managerId) {
         payload.managerId = formData.managerId;
       }
 
       await axios.post(`${API_URL}/register`, payload);
-      
-      alert("Employee created successfully!");
-      
+
+      alert('Employee created successfully!');
+
       // Reset form
       setFormData({
-        name: "",
-        email: "",
-        password: "",
-        role: "employee",
-        managerId: "",
+        name: '',
+        email: '',
+        password: '',
+        role: 'employee',
+        managerId: '',
         casual: 10,
         sick: 5,
         earned: 15,
       });
-      
-      if (onCreated) onCreated(); // Refresh data
-      if (onClose) onClose(); // Close modal
-    } catch (err) {
+
+      onCreated?.();
+      onClose?.();
+    } catch (err: any) {
       console.error(err);
-      const errorMessage = err.response?.data?.error || "Failed to create employee.";
+      const errorMessage = err.response?.data?.error || 'Failed to create employee.';
       alert(errorMessage);
     } finally {
       setLoading(false);
@@ -110,18 +142,13 @@ export default function CreateEmployee({ managers, onCreated, onClose }) {
           value={formData.password}
           onChange={handleChange}
           required
-          minLength="6"
+          minLength={6}
         />
       </div>
 
       <div className="form-group">
         <label htmlFor="role">Role:</label>
-        <select
-          id="role"
-          name="role"
-          value={formData.role}
-          onChange={handleChange}
-        >
+        <select id="role" name="role" value={formData.role} onChange={handleChange}>
           <option value="employee">Employee</option>
           <option value="manager">Manager</option>
           <option value="hr">HR</option>
@@ -130,7 +157,7 @@ export default function CreateEmployee({ managers, onCreated, onClose }) {
       </div>
 
       {/* Show manager selection only for employees */}
-      {formData.role === "employee" && (
+      {formData.role === 'employee' && (
         <div className="form-group">
           <label htmlFor="managerId">Assign Manager:</label>
           <select
@@ -141,13 +168,13 @@ export default function CreateEmployee({ managers, onCreated, onClose }) {
             required
           >
             <option value="">Select a manager</option>
-            {managers && managers.map((manager) => (
+            {managers.map((manager) => (
               <option key={manager._id} value={manager._id}>
                 {manager.name} ({manager.email})
               </option>
             ))}
           </select>
-          {((!managers) || managers.length) === 0 && (
+          {managers.length === 0 && (
             <small className="warning">No managers available. Create a manager first.</small>
           )}
         </div>
@@ -155,7 +182,7 @@ export default function CreateEmployee({ managers, onCreated, onClose }) {
 
       <div className="leave-balances">
         <h4>Initial Leave Balances</h4>
-        
+
         <div className="leave-inputs-grid">
           <div className="form-group">
             <label htmlFor="casual">Casual Leaves:</label>
@@ -203,7 +230,7 @@ export default function CreateEmployee({ managers, onCreated, onClose }) {
           Cancel
         </button>
         <button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Employee"}
+          {loading ? 'Creating...' : 'Create Employee'}
         </button>
       </div>
     </form>

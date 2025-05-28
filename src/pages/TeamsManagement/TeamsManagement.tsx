@@ -1,43 +1,54 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import API_URL from "../../api";
-import "./TeamsManagement.css";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import API_URL from '../../api';
+import './TeamsManagement.css';
+import { User } from '../../types';
+
+interface Team {
+  _id: string;
+  manager: User;
+  members: User[];
+  memberCount: number;
+}
+
+interface ReassignModal {
+  show: boolean;
+  employee: User | null;
+  newManagerId: string;
+}
 
 export default function TeamsManagement() {
-  const [teams, setTeams] = useState([]);
-  const [unassignedEmployees, setUnassignedEmployees] = useState([]);
-  const [allManagers, setAllManagers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [reassignModal, setReassignModal] = useState({
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [unassignedEmployees, setUnassignedEmployees] = useState<User[]>([]);
+  const [allManagers, setAllManagers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'large' | 'small' | 'empty'>('all');
+  const [reassignModal, setReassignModal] = useState<ReassignModal>({
     show: false,
     employee: null,
-    newManagerId: ""
+    newManagerId: ''
   });
 
-  const fetchTeamsData = async () => {
+  const fetchTeamsData = async (): Promise<void> => {
     try {
       setLoading(true);
       const [teamsRes, usersRes] = await Promise.all([
-        axios.get(`${API_URL}/admin/teams`),
-        axios.get(`${API_URL}/admin/users`)
+        axios.get<{ teams: Team[]; unassignedEmployees: User[] }>(`${API_URL}/teams`),
+        axios.get<User[]>(`${API_URL}/users`)
       ]);
 
       setTeams(teamsRes.data.teams);
       setUnassignedEmployees(teamsRes.data.unassignedEmployees);
-      
+
       // Filter managers for reassignment dropdown
-      const managers = usersRes.data.filter(user => 
-        user.role === "manager"
-      );
+      const managers = usersRes.data.filter((user) => user.role === 'manager');
       setAllManagers(managers);
-      
       setError(null);
-    } catch (err) {
-      console.error("Failed to fetch teams data:", err);
-      setError("Failed to load teams data. Please try again later.");
+    } catch (err: any) {
+      console.error('Error fetching teams data:', err);
+      setError('Failed to load teams data. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -47,61 +58,68 @@ export default function TeamsManagement() {
     fetchTeamsData();
   }, []);
 
-  const handleReassignManager = async () => {
+  const handleReassignManager = async (): Promise<void> => {
     if (!reassignModal.employee || !reassignModal.newManagerId) return;
 
     try {
       await axios.put(
-        `${API_URL}/admin/user/${reassignModal.employee._id}/manager`,
+        `${API_URL}/user/${reassignModal.employee?._id}/manager`,
         { managerId: reassignModal.newManagerId }
       );
 
-      alert("Manager assignment updated successfully!");
-      setReassignModal({ show: false, employee: null, newManagerId: "" });
-      fetchTeamsData(); // Refresh data
-    } catch (err) {
-      console.error("Failed to reassign manager:", err);
-      alert("Failed to update manager assignment.");
+      alert('Manager assignment updated successfully!');
+      setReassignModal({ show: false, employee: null, newManagerId: '' });
+      fetchTeamsData();
+    } catch (err: any) {
+      console.error('Failed to reassign manager:', err);
+      alert('Failed to update manager assignment.');
     }
   };
 
-  const openReassignModal = (employee) => {
+  const openReassignModal = (employee: User): void => {
     setReassignModal({
       show: true,
       employee,
-      newManagerId: ""
+      newManagerId: ''
     });
   };
 
   // Filter teams based on search term
-  const filteredTeams = teams.filter(team => {
-    const matchesSearch = 
+  const filteredTeams = teams.filter((team) => {
+    const matchesSearch = (
       team.manager.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       team.manager.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      team.members.some(member => 
-        member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    
-    if (filterStatus === "all") return matchesSearch;
-    if (filterStatus === "large") return matchesSearch && team.memberCount >= 5;
-    if (filterStatus === "small") return matchesSearch && team.memberCount < 5;
-    if (filterStatus === "empty") return matchesSearch && team.memberCount === 0;
-    
+      team.members.some(
+        (member) =>
+          member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          member.email.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+
+    if (filterStatus === 'all') return matchesSearch;
+    if (filterStatus === 'large') return matchesSearch && team.memberCount >= 5;
+    if (filterStatus === 'small') return matchesSearch && team.memberCount < 5;
+    if (filterStatus === 'empty') return matchesSearch && team.memberCount === 0;
+
     return matchesSearch;
   });
 
-  const filteredUnassigned = unassignedEmployees.filter(employee =>
+  const filteredUnassigned = unassignedEmployees.filter((employee) =>
     employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const getInitials = (name: string): string => {
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getTotalMembers = () => {
-    return teams.reduce((total, team) => total + team.memberCount, 0);
+    return teams.reduce((sum, team) => sum + team.memberCount, 0);
   };
 
   if (loading) {
@@ -109,7 +127,7 @@ export default function TeamsManagement() {
   }
 
   if (error) {
-    return <div className="md-error">{error}</div>;
+    return <div className="error">{error}</div>;
   }
 
   return (
@@ -181,7 +199,7 @@ export default function TeamsManagement() {
             <select
               className="md-filter-select"
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'large' | 'small' | 'empty')}
             >
               <option value="all">All Teams</option>
               <option value="large">Large Teams (5+ members)</option>
@@ -337,7 +355,7 @@ export default function TeamsManagement() {
                 <h3 className="md-modal-title">Reassign Manager</h3>
                 <button
                   className="md-close-btn"
-                  onClick={() => setReassignModal({ show: false, employee: null, newManagerId: "" })}
+                  onClick={() => setReassignModal({ show: false, employee: null, newManagerId: '' })}
                 >
                   <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
@@ -384,7 +402,7 @@ export default function TeamsManagement() {
                 <button
                   type="button"
                   className="md-btn-secondary"
-                  onClick={() => setReassignModal({ show: false, employee: null, newManagerId: "" })}
+                  onClick={() => setReassignModal({ show: false, employee: null, newManagerId: '' })}
                 >
                   Cancel
                 </button>
