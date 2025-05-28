@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import API_URL from "../api";
+import "../styles/CreateEmployee.css";
 
 export default function CreateEmployee({ managers, onCreated, onClose }) {
   const [formData, setFormData] = useState({
