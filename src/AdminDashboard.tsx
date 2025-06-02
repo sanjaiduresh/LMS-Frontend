@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-import '../src/styles/AdminDashboard.css';
-import CreateEmployee from './Components/CreateEmployee';
-import TeamsManagement from './pages/TeamsManagement/TeamsManagement';
-import API_URL from './api';
-import { User, Leave, LeaveStatus } from './types';
+import "../src/styles/AdminDashboard.css";
+import CreateEmployee from "./Components/CreateEmployee";
+import TeamsManagement from "./pages/TeamsManagement/TeamsManagement";
+import { API_URL } from "./api";
+import { User, Leave, LeaveStatus } from "./types";
+import BulkUpload from "./Components/BulkUpload";
 
 interface CreateEmployeeProps {
   managers: User[];
@@ -28,9 +29,11 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'teams'>('dashboard');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<LeaveStatus | 'all'>('all');
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "teams" | "create-employees"
+  >("dashboard");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<LeaveStatus | "all">("all");
   const navigate = useNavigate();
 
   const fetchData = async (): Promise<void> => {
@@ -42,7 +45,7 @@ export default function AdminDashboard() {
       setUsers(userRes.data);
       setError(null);
     } catch (err: any) {
-      setError('Failed to fetch admin data. Please try again later.');
+      setError("Failed to fetch admin data. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -52,52 +55,71 @@ export default function AdminDashboard() {
     fetchData();
   }, []);
 
-  const handleAction = async (leaveId: string, action: 'approved' | 'rejected'): Promise<void> => {
-    if (!window.confirm(`Are you sure you want to ${action} this leave request?`)) return;
+  const handleAction = async (
+    leaveId: string,
+    action: "approved" | "rejected"
+  ): Promise<void> => {
+    if (
+      !window.confirm(`Are you sure you want to ${action} this leave request?`)
+    )
+      return;
     try {
       await axios.post(`${API_URL}/admin/leave-action`, { leaveId, action });
       fetchData();
     } catch (err: any) {
-      console.error('Action failed', err);
+      console.error("Action failed", err);
     }
   };
 
   const handleLogout = (): void => {
     localStorage.clear();
-    navigate('/login');
+    navigate("/login");
   };
 
   const getInitials = (name: string | undefined): string => {
     return (
       name
-        ?.split(' ')
+        ?.split(" ")
         .map((n) => n[0])
-        .join('')
-        .toUpperCase() || '?'
+        .join("")
+        .toUpperCase() || "?"
     );
   };
 
   const calculateStats = (): Stats => {
     const totalUsers = users.length;
     const totalLeaves = leaves.length;
-    const pendingLeaves = leaves.filter((leave) => leave.status === 'pending').length;
-    const approvedLeaves = leaves.filter((leave) => leave.status === 'approved').length;
-    const rejectedLeaves = leaves.filter((leave) => leave.status === 'rejected').length;
+    const pendingLeaves = leaves.filter(
+      (leave) => leave.status === "pending"
+    ).length;
+    const approvedLeaves = leaves.filter(
+      (leave) => leave.status === "approved"
+    ).length;
+    const rejectedLeaves = leaves.filter(
+      (leave) => leave.status === "rejected"
+    ).length;
 
-    return { totalUsers, totalLeaves, pendingLeaves, approvedLeaves, rejectedLeaves };
+    return {
+      totalUsers,
+      totalLeaves,
+      pendingLeaves,
+      approvedLeaves,
+      rejectedLeaves,
+    };
   };
 
   const filteredLeaves = leaves.filter((leave) => {
     const matchesSearch =
       leave.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       leave.type.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || leave.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || leave.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const stats = calculateStats();
 
-  if (loading && activeTab === 'dashboard') {
+  if (loading && activeTab === "dashboard") {
     return (
       <div className="ad-container">
         <div className="ad-loading">Loading Admin Dashboard...</div>
@@ -160,18 +182,29 @@ export default function AdminDashboard() {
           {/* Navigation Tabs */}
           <div className="ad-nav-tabs">
             <button
-              className={`ad-nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setActiveTab('dashboard')}
+              className={`ad-nav-tab ${
+                activeTab === "dashboard" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("dashboard")}
             >
               <span>📊</span>
               Dashboard
             </button>
             <button
-              className={`ad-nav-tab ${activeTab === 'teams' ? 'active' : ''}`}
-              onClick={() => setActiveTab('teams')}
+              className={`ad-nav-tab ${activeTab === "teams" ? "active" : ""}`}
+              onClick={() => setActiveTab("teams")}
             >
               <span>👥</span>
               Teams
+            </button>
+            <button
+              className={`ad-nav-tab ${
+                activeTab === "create-employees" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("create-employees")}
+            >
+              <span>👥</span>
+              Add Employees
             </button>
           </div>
 
@@ -186,13 +219,13 @@ export default function AdminDashboard() {
               <div className="ad-summary-item">
                 <span className="ad-summary-label">Managers</span>
                 <span className="ad-summary-value">
-                  {users.filter((u) => u.role === 'manager').length}
+                  {users.filter((u) => u.role === "manager").length}
                 </span>
               </div>
               <div className="ad-summary-item">
                 <span className="ad-summary-label">Employees</span>
                 <span className="ad-summary-value">
-                  {users.filter((u) => u.role === 'employee').length}
+                  {users.filter((u) => u.role === "employee").length}
                 </span>
               </div>
             </div>
@@ -202,21 +235,13 @@ export default function AdminDashboard() {
         {/* Main Content */}
         <main className="ad-main">
           <div className="ad-content">
-            {activeTab === 'dashboard' && (
+            {activeTab === "dashboard" && (
               <>
                 <div className="ad-content-header">
                   <h1 className="ad-content-title">Admin Dashboard</h1>
                   <p className="ad-content-subtitle">
                     Manage leave requests, users, and system operations
                   </p>
-                </div>
-
-                {/* Create Employee Section */}
-                <div className="ad-create-section">
-                  <button className="ad-create-btn" onClick={() => setShowModal(true)}>
-                    <span>➕</span>
-                    Create New Employee
-                  </button>
                 </div>
 
                 {/* Filters */}
@@ -236,7 +261,9 @@ export default function AdminDashboard() {
                     <select
                       className="ad-filter-select"
                       value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value as LeaveStatus | 'all')}
+                      onChange={(e) =>
+                        setStatusFilter(e.target.value as LeaveStatus | "all")
+                      }
                     >
                       <option value="all">All Status</option>
                       <option value="pending">Pending</option>
@@ -265,11 +292,17 @@ export default function AdminDashboard() {
                                 {getInitials(leave.userName)}
                               </div>
                               <div className="ad-request-info">
-                                <div className="ad-request-name">{leave.userName || 'N/A'}</div>
-                                <div className="ad-request-type">{leave.type} Leave</div>
+                                <div className="ad-request-name">
+                                  {leave.userName || "N/A"}
+                                </div>
+                                <div className="ad-request-type">
+                                  {leave.type} Leave
+                                </div>
                               </div>
                             </div>
-                            <div className={`ad-request-status ${leave.status.toLowerCase()}`}>
+                            <div
+                              className={`ad-request-status ${leave.status.toLowerCase()}`}
+                            >
                               {leave.status}
                             </div>
                           </div>
@@ -291,7 +324,12 @@ export default function AdminDashboard() {
                               <div className="ad-date-item">
                                 <span className="ad-date-label">Duration</span>
                                 <span className="ad-date-value">
-                                  {Math.ceil((new Date(leave.to).getTime() - new Date(leave.from).getTime()) / (1000 * 60 * 60 * 24)) + 1} days
+                                  {Math.ceil(
+                                    (new Date(leave.to).getTime() -
+                                      new Date(leave.from).getTime()) /
+                                      (1000 * 60 * 60 * 24)
+                                  ) + 1}{" "}
+                                  days
                                 </span>
                               </div>
                             </div>
@@ -299,23 +337,29 @@ export default function AdminDashboard() {
                             {leave.reason && (
                               <div className="ad-request-reason">
                                 <span className="ad-reason-label">Reason:</span>
-                                <span className="ad-reason-text">{leave.reason}</span>
+                                <span className="ad-reason-text">
+                                  {leave.reason}
+                                </span>
                               </div>
                             )}
                           </div>
 
-                          {leave.status === 'pending' && (
+                          {leave.status === "pending" && (
                             <div className="ad-request-actions">
                               <button
                                 className="ad-action-btn approve"
-                                onClick={() => handleAction(leave._id, 'approved')}
+                                onClick={() =>
+                                  handleAction(leave._id, "approved")
+                                }
                               >
                                 <span>✅</span>
                                 Approve
                               </button>
                               <button
                                 className="ad-action-btn reject"
-                                onClick={() => handleAction(leave._id, 'rejected')}
+                                onClick={() =>
+                                  handleAction(leave._id, "rejected")
+                                }
                               >
                                 <span>❌</span>
                                 Reject
@@ -327,13 +371,20 @@ export default function AdminDashboard() {
                     </div>
                   )}
                 </div>
+              </>
+            )}
 
-                {/* Users Section */}
-                <div className="ad-users-section">
+            {activeTab === "teams" && (
+              <>
+                    <TeamsManagement/>
+
+                {/* <div className="ad-users-section">
                   <h2 className="ad-section-title">Users & Leave Balances</h2>
                   <div className="ad-users-grid">
                     {users.map((user) => {
-                      const manager = user.managerId ? users.find((u) => u._id === user.managerId) : null;
+                      const manager = user.managerId
+                        ? users.find((u) => u._id === user.managerId)
+                        : null;
                       const totalBalance =
                         (user.leaveBalance?.casual || 0) +
                         (user.leaveBalance?.sick || 0) +
@@ -354,19 +405,23 @@ export default function AdminDashboard() {
                             </div>
                           </div>
 
-                          {user.role === 'employee' && (
+                          {user.role === "employee" && (
                             <div className="ad-user-manager">
                               <span className="ad-manager-label">Manager:</span>
                               <span className="ad-manager-name">
-                                {manager ? manager.name : '⚠️ Unassigned'}
+                                {manager ? manager.name : "⚠️ Unassigned"}
                               </span>
                             </div>
                           )}
 
                           <div className="ad-user-balance">
                             <div className="ad-balance-total">
-                              <span className="ad-balance-number">{totalBalance}</span>
-                              <span className="ad-balance-label">Total Days</span>
+                              <span className="ad-balance-number">
+                                {totalBalance}
+                              </span>
+                              <span className="ad-balance-label">
+                                Total Days
+                              </span>
                             </div>
                             <div className="ad-balance-details">
                               <div className="ad-balance-item">
@@ -393,11 +448,24 @@ export default function AdminDashboard() {
                       );
                     })}
                   </div>
-                </div>
+                </div> */}
               </>
             )}
-
-            {activeTab === 'teams' && <TeamsManagement />}
+            {activeTab === "create-employees" && (
+              <>
+                {/* Create Employee Section */}
+                <div className="ad-create-section">
+                  <button
+                    className="ad-create-btn"
+                    onClick={() => setShowModal(true)}
+                  >
+                    <span>➕</span>
+                    Create New Employee
+                  </button>
+                </div>
+                <BulkUpload />
+              </>
+            )}
           </div>
         </main>
       </div>
@@ -406,11 +474,14 @@ export default function AdminDashboard() {
       {showModal && (
         <div className="ad-modal-overlay">
           <div className="ad-modal-content">
-            <button className="ad-close-modal-btn" onClick={() => setShowModal(false)}>
+            <button
+              className="ad-close-modal-btn"
+              onClick={() => setShowModal(false)}
+            >
               ✖
             </button>
             <CreateEmployee
-              managers={users.filter((user) => user.role === 'manager')}
+              managers={users.filter((user) => user.role === "manager")}
               onCreated={fetchData}
               onClose={() => setShowModal(false)}
             />

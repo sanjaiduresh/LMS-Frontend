@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import "./styles/Dashboard.css";
 import ApplyLeave from "./Components/ApplyLeave";
-import API_URL from "./api";
+import {API_URL} from "./api";
 import { User, Leave, Role } from "./types";
 const ALL_APPROVERS: Role[] = ["hr", "manager"];
 

@@ -3,7 +3,7 @@ import { User, Users, Calendar, Clock, Search, Filter, CheckCircle, XCircle, Log
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import './styles/HRDashboard.css';
-import API_URL from './api';
+import {API_URL} from './api';
 import { User as UserType, Leave, Role, LeaveType } from './types';
 
 interface ApplyLeaveFormProps {

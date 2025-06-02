@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Search, Filter, Users, Calendar, CheckCircle, XCircle, Clock, LogOut, Plus } from "lucide-react";
 import "./styles/ManagerDashboard.css";
 import ApplyLeave from "./Components/ApplyLeave";
-import API_URL from "./api";
+import {API_URL} from "./api";
 import LeaveCalendar from "./pages/LeaveCalendar/LeaveCalendar";
 import { User, Leave, Team, Role, ApplyLeaveProps } from "./types";
 

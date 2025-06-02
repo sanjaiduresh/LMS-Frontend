@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
 import '../styles/Auth.css';
-import API_URL from '../api';
+import {API_URL} from '../api';
 import { Role } from '../types';
 
 interface RegisterProps {

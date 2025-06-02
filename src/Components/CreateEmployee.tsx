@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-import API_URL from '../api';
+import {API_URL} from '../api';
 import '../styles/CreateEmployee.css';
 import { User, Role, LeaveBalance } from '../types';
 

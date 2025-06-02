@@ -148,7 +148,7 @@ body {
 
 /* Sidebar */
 .ad-sidebar {
-  width: 280px;
+  width: 300px;
   background: var(--ad-bg-secondary);
   border-right: 1px solid var(--ad-border);
   padding: 24px;
@@ -161,7 +161,7 @@ body {
 /* Stats Card */
 .ad-stats-card {
   background: linear-gradient(135deg, var(--ad-purple-primary), var(--ad-purple-secondary));
-  padding: 20px;
+  padding: 10px;
   border-radius: 12px;
   color: white;
   box-shadow: var(--ad-shadow);

@@ -1,0 +1,328 @@
+/* BulkUpload Component Styles - Matching Admin Dashboard Theme */
+
+.bulk-upload-container {
+  background: var(--ad-bg-card);
+  border: 1px solid var(--ad-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-left: 16px;
+  display: inline-block;
+  min-width: 320px;
+  box-shadow: var(--ad-shadow);
+  transition: all 0.2s ease;
+}
+
+.bulk-upload-container:hover {
+  border-color: var(--ad-border-light);
+  box-shadow: var(--ad-shadow-lg);
+}
+
+/* Header */
+.bulk-upload-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.bulk-upload-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.bulk-upload-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ad-text-primary);
+  margin-bottom: 4px;
+}
+
+.bulk-upload-subtitle {
+  font-size: 14px;
+  color: var(--ad-text-secondary);
+  line-height: 1.4;
+}
+
+/* Dropzone */
+.bulk-upload-dropzone {
+  border: 2px dashed var(--ad-border);
+  border-radius: 8px;
+  padding: 32px 20px;
+  text-align: center;
+  background: var(--ad-bg-secondary);
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+  position: relative;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bulk-upload-dropzone:hover {
+  border-color: var(--ad-purple-primary);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.bulk-upload-dropzone.active {
+  border-color: var(--ad-purple-primary);
+  background: rgba(139, 92, 246, 0.1);
+  border-style: solid;
+}
+
+.bulk-upload-dropzone.has-file {
+  border-color: var(--ad-success);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+/* Drop Content */
+.bulk-upload-drop-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.bulk-upload-drop-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.bulk-upload-drop-text {
+  font-size: 14px;
+  color: var(--ad-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.bulk-upload-browse-link {
+  color: var(--ad-purple-primary);
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.bulk-upload-browse-link:hover {
+  color: var(--ad-purple-secondary);
+}
+
+.bulk-upload-drop-hint {
+  font-size: 12px;
+  color: var(--ad-text-muted);
+  margin: 0;
+}
+
+.bulk-upload-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* File Preview */
+.bulk-upload-file-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--ad-bg-card);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--ad-border-light);
+  width: 100%;
+}
+
+.bulk-upload-file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.bulk-upload-file-icon {
+  font-size: 24px;
+  color: var(--ad-success);
+}
+
+.bulk-upload-file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bulk-upload-file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ad-text-primary);
+  margin: 0;
+  word-break: break-all;
+}
+
+.bulk-upload-file-size {
+  font-size: 12px;
+  color: var(--ad-text-secondary);
+  margin: 0;
+}
+
+.bulk-upload-remove-btn {
+  background: none;
+  border: none;
+  color: var(--ad-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.bulk-upload-remove-btn:hover {
+  color: var(--ad-danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Message */
+.bulk-upload-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.bulk-upload-message.success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: var(--ad-success);
+}
+
+.bulk-upload-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--ad-danger);
+}
+
+.bulk-upload-message-icon {
+  font-size: 16px;
+}
+
+/* Actions */
+.bulk-upload-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.bulk-upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--ad-purple-primary), var(--ad-purple-secondary));
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.bulk-upload-btn:hover:not(.disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.bulk-upload-btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--ad-text-muted);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Spinner Animation */
+.bulk-upload-spinner {
+  display: inline-block;
+  animation: bulk-upload-spin 1s linear infinite;
+}
+
+@keyframes bulk-upload-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .bulk-upload-container {
+    margin-left: 0;
+    margin-top: 16px;
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .bulk-upload-dropzone {
+    padding: 24px 16px;
+    min-height: 100px;
+  }
+  
+  .bulk-upload-drop-icon {
+    font-size: 28px;
+  }
+  
+  .bulk-upload-file-preview {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .bulk-upload-remove-btn {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .bulk-upload-container {
+    padding: 20px;
+  }
+  
+  .bulk-upload-dropzone {
+    padding: 20px 12px;
+  }
+  
+  .bulk-upload-drop-text {
+    font-size: 13px;
+  }
+  
+  .bulk-upload-btn {
+    width: 100%;
+  }
+}
+
+/* Integration with Admin Create Section */
+.ad-create-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .ad-create-section {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .ad-create-section .bulk-upload-container {
+    margin-left: 0;
+    margin-top: 16px;
+  }
+}

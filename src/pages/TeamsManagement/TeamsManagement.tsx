@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import API_URL from '../../api';
+import {API_URL} from '../../api';
 import './TeamsManagement.css';
 import { User } from '../../types';
 
@@ -35,8 +35,8 @@ export default function TeamsManagement() {
     try {
       setLoading(true);
       const [teamsRes, usersRes] = await Promise.all([
-        axios.get<{ teams: Team[]; unassignedEmployees: User[] }>(`${API_URL}/teams`),
-        axios.get<User[]>(`${API_URL}/users`)
+        axios.get<{ teams: Team[]; unassignedEmployees: User[] }>(`${API_URL}/admin/teams`),
+        axios.get<User[]>(`${API_URL}/admin/users`)
       ]);
 
       setTeams(teamsRes.data.teams);
@@ -63,7 +63,7 @@ export default function TeamsManagement() {
 
     try {
       await axios.put(
-        `${API_URL}/user/${reassignModal.employee?._id}/manager`,
+        `${API_URL}/admin/user/${reassignModal.employee?._id}/manager`,
         { managerId: reassignModal.newManagerId }
       );
 
