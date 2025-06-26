@@ -6,10 +6,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import '../styles/Auth.css';
 import {API_URL} from '../api';
 import { User, Role } from '../types';
-
-/* ------------------------------------------------------------------ */
-/* Types                                                              */
-/* ------------------------------------------------------------------ */
 interface LoginProps {
   setToken: (token: { token: string; role: Role }) => void;
 }
@@ -19,9 +15,6 @@ interface LoginForm {
   password: string;
 }
 
-/* ------------------------------------------------------------------ */
-/* Component                                                          */
-/* ------------------------------------------------------------------ */
 export default function Login({ setToken }: LoginProps) {
   const [form, setForm]         = useState<LoginForm>({ email: '', password: '' });
   const [message, setMessage]   = useState<string>('');

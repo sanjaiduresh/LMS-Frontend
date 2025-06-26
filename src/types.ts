@@ -12,6 +12,7 @@ export interface LeaveBalance {
 }
 
 export interface User {
+  id: number;
   _id: string;
   name: string;
   email: string;
@@ -24,6 +25,12 @@ export interface User {
 }
 
 export interface Leave {
+  statusName: any;
+  id: any;
+  leaveTypeName: any;
+  fromDate: any;
+  toDate: any;
+  totalDays: any;
   _id: string;
   userId: string;
   userName?: string;

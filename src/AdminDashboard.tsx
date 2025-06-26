@@ -272,7 +272,6 @@ export default function AdminDashboard() {
                     </select>
                   </div>
                 </div>
-
                 {/* Leave Requests */}
                 <div className="ad-requests-section">
                   <h2 className="ad-section-title">Leave Requests</h2>
@@ -306,7 +305,6 @@ export default function AdminDashboard() {
                               {leave.status}
                             </div>
                           </div>
-
                           <div className="ad-request-details">
                             <div className="ad-request-dates">
                               <div className="ad-date-item">
@@ -333,7 +331,6 @@ export default function AdminDashboard() {
                                 </span>
                               </div>
                             </div>
-
                             {leave.reason && (
                               <div className="ad-request-reason">
                                 <span className="ad-reason-label">Reason:</span>
@@ -343,7 +340,6 @@ export default function AdminDashboard() {
                               </div>
                             )}
                           </div>
-
                           {leave.status === "pending" && (
                             <div className="ad-request-actions">
                               <button
@@ -377,78 +373,6 @@ export default function AdminDashboard() {
             {activeTab === "teams" && (
               <>
                     <TeamsManagement/>
-
-                {/* <div className="ad-users-section">
-                  <h2 className="ad-section-title">Users & Leave Balances</h2>
-                  <div className="ad-users-grid">
-                    {users.map((user) => {
-                      const manager = user.managerId
-                        ? users.find((u) => u._id === user.managerId)
-                        : null;
-                      const totalBalance =
-                        (user.leaveBalance?.casual || 0) +
-                        (user.leaveBalance?.sick || 0) +
-                        (user.leaveBalance?.earned || 0);
-
-                      return (
-                        <div key={user._id} className="ad-user-card">
-                          <div className="ad-user-header">
-                            <div className="ad-user-avatar">
-                              {getInitials(user.name)}
-                            </div>
-                            <div className="ad-user-info">
-                              <div className="ad-user-name">{user.name}</div>
-                              <div className="ad-user-email">{user.email}</div>
-                              <div className={`ad-user-role ${user.role}`}>
-                                {user.role}
-                              </div>
-                            </div>
-                          </div>
-
-                          {user.role === "employee" && (
-                            <div className="ad-user-manager">
-                              <span className="ad-manager-label">Manager:</span>
-                              <span className="ad-manager-name">
-                                {manager ? manager.name : "⚠️ Unassigned"}
-                              </span>
-                            </div>
-                          )}
-
-                          <div className="ad-user-balance">
-                            <div className="ad-balance-total">
-                              <span className="ad-balance-number">
-                                {totalBalance}
-                              </span>
-                              <span className="ad-balance-label">
-                                Total Days
-                              </span>
-                            </div>
-                            <div className="ad-balance-details">
-                              <div className="ad-balance-item">
-                                <span className="ad-balance-type">Casual</span>
-                                <span className="ad-balance-count">
-                                  {user.leaveBalance?.casual || 0}
-                                </span>
-                              </div>
-                              <div className="ad-balance-item">
-                                <span className="ad-balance-type">Sick</span>
-                                <span className="ad-balance-count">
-                                  {user.leaveBalance?.sick || 0}
-                                </span>
-                              </div>
-                              <div className="ad-balance-item">
-                                <span className="ad-balance-type">Earned</span>
-                                <span className="ad-balance-count">
-                                  {user.leaveBalance?.earned || 0}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div> */}
               </>
             )}
             {activeTab === "create-employees" && (

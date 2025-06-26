@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
-import {API_URL} from '../api';
-import '../styles/ApplyLeave.css';
-import { LeaveBalance, Leave } from '../types';
+import { API_URL } from "../api";
+import "../styles/ApplyLeave.css";
+import { LeaveBalance, Leave } from "../types";
 
 interface ApplyLeaveProps {
   userId: string;
@@ -11,17 +11,21 @@ interface ApplyLeaveProps {
   existingLeaves: Leave[];
 }
 
-export default function ApplyLeave({ userId, onLeaveApplied, existingLeaves }: ApplyLeaveProps) {
-  const [type, setType] = useState<keyof LeaveBalance>('casual');
-  const [from, setFrom] = useState<string>('');
-  const [to, setTo] = useState<string>('');
-  const [reason, setReason] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
+export default function ApplyLeave({
+  userId,
+  onLeaveApplied,
+  existingLeaves,
+}: ApplyLeaveProps) {
+  const [type, setType] = useState<keyof LeaveBalance>("casual");
+  const [from, setFrom] = useState<string>("");
+  const [to, setTo] = useState<string>("");
+  const [reason, setReason] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const getTodayDate = (): string => {
     const today = new Date();
-    return today.toISOString().split('T')[0]; // Format as yyyy-mm-dd
+    return today.toISOString().split("T")[0]; // Format as yyyy-mm-dd
   };
 
   const getLeaveDateSet = (): Set<string> => {
@@ -34,7 +38,7 @@ export default function ApplyLeave({ userId, onLeaveApplied, existingLeaves }: A
       while (current <= toDate) {
         const day = current.getDay();
         if (day !== 0 && day !== 6) {
-          dateSet.add(current.toISOString().split('T')[0]);
+          dateSet.add(current.toISOString().split("T")[0]);
         }
         current.setDate(current.getDate() + 1);
       }
@@ -43,7 +47,9 @@ export default function ApplyLeave({ userId, onLeaveApplied, existingLeaves }: A
     return dateSet;
   };
 
-  const handleApply = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleApply = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
 
     const fromDate = new Date(from);
@@ -51,7 +57,7 @@ export default function ApplyLeave({ userId, onLeaveApplied, existingLeaves }: A
     const today = new Date(getTodayDate());
 
     if (fromDate < today || toDate < today) {
-      setMessage('❌ You cannot select past dates for leave.');
+      setMessage("❌ You cannot select past dates for leave.");
       return;
     }
 
@@ -68,22 +74,28 @@ export default function ApplyLeave({ userId, onLeaveApplied, existingLeaves }: A
       const day = tempDate.getDay();
       if (day !== 0 && day !== 6) {
         weekdayCount++;
-        requestedDates.push(tempDate.toISOString().split('T')[0]);
+        requestedDates.push(tempDate.toISOString().split("T")[0]);
       }
       tempDate.setDate(tempDate.getDate() + 1);
     }
 
     if (weekdayCount === 0) {
-      setMessage('❌ Leave period falls entirely on weekends. Please choose weekdays.');
+      setMessage(
+        "❌ Leave period falls entirely on weekends. Please choose weekdays."
+      );
       return;
     }
 
     // Check for conflict with existing leaves
     const existingLeaveDates = getLeaveDateSet();
-    const hasConflict = requestedDates.some((date) => existingLeaveDates.has(date));
+    const hasConflict = requestedDates.some((date) =>
+      existingLeaveDates.has(date)
+    );
 
     if (hasConflict) {
-      setMessage('❌ You have already applied for leave on one or more of these dates.');
+      setMessage(
+        "❌ You have already applied for leave on one or more of these dates."
+      );
       return;
     }
 
@@ -93,7 +105,7 @@ export default function ApplyLeave({ userId, onLeaveApplied, existingLeaves }: A
         type,
         from,
         to,
-        status: 'pending' as const,
+        status: "pending" as const,
         reason,
         validDays: weekdayCount,
       });
@@ -101,11 +113,11 @@ export default function ApplyLeave({ userId, onLeaveApplied, existingLeaves }: A
       setMessage(`✅ Leave Applied for ${weekdayCount} working day(s)!`);
       onLeaveApplied();
       setShowModal(false);
-      setFrom('');
-      setTo('');
-      setReason('');
+      setFrom("");
+      setTo("");
+      setReason("");
     } catch (err: any) {
-      setMessage('❌ Failed to apply leave.');
+      setMessage("❌ Failed to apply leave.");
     }
   };
 
@@ -168,10 +180,10 @@ export default function ApplyLeave({ userId, onLeaveApplied, existingLeaves }: A
                 type="button"
                 onClick={() => {
                   setShowModal(false);
-                  setMessage('');
-                  setFrom('');
-                  setTo('');
-                  setReason('');
+                  setMessage("");
+                  setFrom("");
+                  setTo("");
+                  setReason("");
                 }}
                 aria-label="Cancel leave application"
               >
